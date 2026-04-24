@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOBR · Salir sin alcohol está de moda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- Leaflet para el mapa -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  :root {
+    /* Paleta AZUL */
+    --cream: #EEF3FB;           /* fondo principal */
+    --cream-deep: #DDE7F4;      /* fondo secundario */
+    --coral: #2563EB;           /* azul acento (era coral) */
+    --coral-deep: #1D4ED8;      /* azul oscuro (era coral-deep) */
+    --tangerine: #3B82F6;       /* azul claro */
+    --mint: #BFDBFE;            /* azul suave (era mint) */
+    --mint-deep: #1E40AF;       /* azul profundo */
+    --plum: #0B1E3F;            /* azul marino casi negro (era plum) */
+    --plum-soft: #334868;       /* azul-gris */
+    --yellow: #7DD3FC;          /* celeste (era yellow) */
+    --white: #FFFFFF;
+    --shadow: 0 10px 30px rgba(11, 30, 63, 0.08);
+    --shadow-strong: 0 20px 50px rgba(11, 30, 63, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--cream);
+    color: var(--plum);
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    opacity: 0.06;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.45;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ============ NAVBAR ============ */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(238, 243, 251, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1.5px solid rgba(11, 30, 63, 0.08);
+    padding: 18px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+    color: var(--plum);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-dot {
+    width: 14px;
+    height: 14px;
+    background: var(--coral);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+    animation: pulse 2.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2); }
+    50% { box-shadow: 0 0 0 8px rgba(37, 99, 235, 0.08); }
+  }
+
+  .nav-links { display: flex; gap: 6px; align-items: center; }
+  .nav-links a, .nav-links button {
+    color: var(--plum);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 8px 16px;
+    border-radius: 100px;
+    transition: all 0.25s ease;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .nav-links a:hover, .nav-links button:hover {
+    background: var(--plum);
+    color: var(--cream);
+  }
+  .profile-pill {
+    background: var(--mint) !important;
+    color: var(--plum) !important;
+    padding: 8px 18px !important;
+    font-weight: 700 !important;
+  }
+  .profile-pill:hover {
+    background: var(--mint-deep) !important;
+    color: var(--cream) !important;
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    position: relative;
+    padding: 90px 40px 140px;
+    text-align: center;
+    z-index: 2;
+    overflow: hidden;
+  }
+
+  .hero .blob-1 { top: -100px; left: -100px; width: 500px; height: 500px; background: var(--coral); }
+  .hero .blob-2 { bottom: -100px; right: -100px; width: 450px; height: 450px; background: var(--mint); }
+
+  .eyebrow {
+    display: inline-block;
+    background: var(--plum);
+    color: var(--cream);
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 2;
+  }
+  .eyebrow::before {
+    content: '●';
+    color: var(--yellow);
+    margin-right: 6px;
+  }
+
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(2.8rem, 7vw, 5.6rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-width: 1000px;
+    margin: 0 auto 24px;
+    position: relative;
+    z-index: 2;
+  }
+  .hero h1 .italic {
+    font-style: italic;
+    color: var(--coral);
+    font-weight: 600;
+  }
+  .hero h1 .highlight {
+    background: var(--yellow);
+    padding: 0 14px;
+    border-radius: 14px;
+    display: inline-block;
+    transform: rotate(-2deg);
+  }
+
+  .hero p {
+    font-size: 1.15rem;
+    max-width: 620px;
+    margin: 0 auto 40px;
+    color: var(--plum-soft);
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+  }
+
+  .btn-primary, .btn-secondary {
+    font-family: 'Manrope', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 16px 32px;
+    border-radius: 100px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary {
+    background: var(--coral);
+    color: var(--cream);
+    box-shadow: 0 6px 0 var(--coral-deep);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 var(--coral-deep);
+  }
+  .btn-primary:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--coral-deep); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--plum);
+    border: 2.5px solid var(--plum);
+  }
+  .btn-secondary:hover {
+    background: var(--plum);
+    color: var(--cream);
+  }
+
+  /* ============ MISSION STRIP ============ */
+  .mission-strip {
+    background: var(--plum);
+    color: var(--cream);
+    padding: 22px 0;
+    overflow: hidden;
+    position: relative;
+    z-index: 3;
+    border-top: 3px solid var(--coral);
+    border-bottom: 3px solid var(--coral);
+  }
+  .mission-track {
+    display: flex;
+    gap: 50px;
+    white-space: nowrap;
+    animation: scroll 40s linear infinite;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.8rem;
+    font-style: italic;
+  }
+  .mission-track span { display: inline-flex; align-items: center; gap: 50px; }
+  .mission-track .dot { color: var(--coral); }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ============ STATS ============ */
+  .stats {
+    padding: 80px 40px;
+    position: relative;
+    z-index: 2;
+  }
+  .stats-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+  }
+  .stat-card {
+    background: var(--white);
+    border: 2px solid var(--plum);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 6px 6px 0 var(--plum);
+    transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--plum); }
+  .stat-card:nth-child(1) { background: var(--mint); }
+  .stat-card:nth-child(2) { background: var(--yellow); }
+  .stat-card:nth-child(3) { background: var(--coral); color: var(--cream); }
+  .stat-card:nth-child(3) .stat-label { color: var(--cream); opacity: 0.85; }
+  .stat-number {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 3.5rem;
+    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .stat-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--plum-soft);
+    line-height: 1.4;
+  }
+
+  /* ============ MAP SECTION ============ */
+  .map-section {
+    padding: 60px 40px 40px;
+    position: relative;
+    z-index: 2;
+  }
+  .map-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    background: var(--white);
+    border: 2.5px solid var(--plum);
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 8px 8px 0 var(--plum);
+  }
+  #map {
+    width: 100%;
+    height: 520px;
+    background: var(--cream-deep);
+  }
+  .map-header {
+    padding: 20px 24px;
+    border-bottom: 2px dashed rgba(11, 30, 63, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    background: var(--cream-deep);
+  }
+  .map-header-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .map-header-counter {
+    background: var(--coral);
+    color: var(--cream);
+    padding: 4px 12px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .leaflet-popup-content-wrapper {
+    border-radius: 16px;
+    border: 2px solid var(--plum);
+    padding: 2px;
+  }
+  .leaflet-popup-content {
+    margin: 12px 14px;
+    font-family: 'Manrope', sans-serif;
+  }
+  .map-popup h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: var(--plum);
+  }
+  .map-popup .cat {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--coral);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .map-popup .addr {
+    font-size: 0.82rem;
+    color: var(--plum-soft);
+    margin-bottom: 8px;
+  }
+  .map-popup a {
+    display: inline-block;
+    background: var(--coral);
+    color: var(--cream);
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-decoration: none;
+  }
+
+  /* ============ PLACES SECTION ============ */
+  .places-section {
+    padding: 80px 40px 120px;
+    position: relative;
+    z-index: 2;
+  }
+  .places-header {
+    max-width: 1400px;
+    margin: 0 auto 50px;
+    text-align: center;
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .section-title .italic { font-style: italic; font-weight: 600; color: var(--coral); }
+  .section-subtitle {
+    color: var(--plum-soft);
+    font-size: 1.1rem;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  /* ============ FILTER PANEL ============ */
+  .filter-panel {
+    max-width: 1400px;
+    margin: 0 auto 40px;
+    background: var(--white);
+    border: 2.5px solid var(--plum);
+    border-radius: 28px;
+    padding: 28px;
+    box-shadow: 6px 6px 0 var(--plum);
+  }
+  .filter-panel-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px dashed rgba(11, 30, 63, 0.15);
+  }
+  .filter-panel-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .filter-results-count {
+    background: var(--coral);
+    color: var(--cream);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  .filter-group {
+    margin-bottom: 18px;
+  }
+  .filter-group:last-child { margin-bottom: 0; }
+  .filter-group-label {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--plum);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .filter-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .check-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cream);
+    border: 2px solid var(--plum);
+    color: var(--plum);
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-family: 'Manrope', sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+  .check-pill input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .check-pill .check-box {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--plum);
+    border-radius: 4px;
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .check-pill .check-box svg {
+    opacity: 0;
+    transition: opacity 0.15s;
+    color: var(--cream);
+  }
+  .check-pill:hover {
+    background: var(--cream-deep);
+  }
+  .check-pill.checked {
+    background: var(--plum);
+    color: var(--cream);
+    border-color: var(--plum);
+  }
+  .check-pill.checked .check-box {
+    background: var(--coral);
+    border-color: var(--coral);
+  }
+  .check-pill.checked .check-box svg { opacity: 1; }
+  .check-pill .pill-count {
+    background: rgba(11, 30, 63, 0.12);
+    padding: 2px 7px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .check-pill.checked .pill-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: var(--cream);
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 2px dashed rgba(11, 30, 63, 0.15);
+    flex-wrap: wrap;
+  }
+  .btn-clear {
+    background: transparent;
+    border: 2px solid var(--plum);
+    color: var(--plum);
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    font-family: 'Manrope', sans-serif;
+    transition: all 0.2s;
+  }
+  .btn-clear:hover { background: var(--plum); color: var(--cream); }
+
+  /* ============ PLACE CARDS ============ */
+  .places-grid {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+  }
+
+  .place-card {
+    background: var(--white);
+    border-radius: 28px;
+    overflow: hidden;
+    border: 2px solid var(--plum);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .place-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-strong);
+  }
+
+  .place-card-header {
+    padding: 24px 24px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cream-deep);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--plum);
+  }
+
+  .rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--plum);
+    color: var(--cream);
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .rating-badge .star { color: var(--yellow); }
+
+  .place-card-body {
+    padding: 16px 24px 24px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .place-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.45rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+    color: var(--plum);
+  }
+
+  .place-description {
+    font-size: 0.92rem;
+    color: var(--plum-soft);
+    line-height: 1.5;
+    margin-bottom: 14px;
+    flex-grow: 1;
+  }
+
+  .place-address {
+    font-size: 0.85rem;
+    color: var(--plum-soft);
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(11, 30, 63, 0.2);
+  }
+  .place-address svg { flex-shrink: 0; margin-top: 3px; }
+
+  .place-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .place-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    background: var(--mint);
+    color: var(--plum);
+    border-radius: 100px;
+    letter-spacing: 0.03em;
+  }
+  .place-tag.price { background: var(--yellow); }
+  .place-tag.zone { background: var(--cream-deep); }
+
+  .place-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  .btn-maps, .btn-choose {
+    flex: 1;
+    font-family: 'Manrope', sans-serif;
+    padding: 12px 16px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+    text-align: center;
+  }
+  .btn-maps {
+    background: var(--cream-deep);
+    color: var(--plum);
+    border: 2px solid var(--plum);
+  }
+  .btn-maps:hover { background: var(--plum); color: var(--cream); }
+  .btn-choose {
+    background: var(--coral);
+    color: var(--cream);
+    border: 2px solid var(--coral);
+  }
+  .btn-choose:hover { background: var(--coral-deep); border-color: var(--coral-deep); }
+
+  .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--plum-soft);
+    font-size: 1.1rem;
+  }
+
+  /* ============ MODAL ============ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(11, 30, 63, 0.6);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .modal-overlay.active { display: flex; opacity: 1; }
+
+  .modal {
+    background: var(--cream);
+    border-radius: 28px;
+    max-width: 520px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    border: 2.5px solid var(--plum);
+    box-shadow: 12px 12px 0 var(--plum);
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.25s ease;
+  }
+  .modal-overlay.active .modal { transform: scale(1) translateY(0); }
+
+  .modal-header {
+    padding: 28px 32px 16px;
+    border-bottom: 2px dashed rgba(11, 30, 63, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .modal-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.8rem;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .modal-title .italic { font-style: italic; color: var(--coral); font-weight: 600; }
+  .modal-close {
+    background: var(--plum);
+    color: var(--cream);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { background: var(--coral); transform: rotate(90deg); }
+
+  .modal-body { padding: 24px 32px; }
+
+  .form-group { margin-bottom: 20px; }
+  .form-label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--plum);
+  }
+  .form-label .helper {
+    font-weight: 500;
+    color: var(--plum-soft);
+    font-size: 0.8rem;
+  }
+  .form-input {
+    width: 100%;
+    font-family: 'Manrope', sans-serif;
+    padding: 14px 18px;
+    border: 2px solid var(--plum);
+    background: var(--white);
+    border-radius: 16px;
+    font-size: 1rem;
+    color: var(--plum);
+    transition: all 0.2s;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--coral);
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
+  }
+  .form-input.error {
+    border-color: var(--coral-deep);
+    background: #EEF2FF;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-error {
+    font-size: 0.82rem;
+    color: var(--coral-deep);
+    margin-top: 6px;
+    display: none;
+    font-weight: 600;
+  }
+  .form-error.visible { display: block; }
+
+  .form-info {
+    background: var(--mint);
+    padding: 14px 18px;
+    border-radius: 16px;
+    font-size: 0.88rem;
+    color: var(--plum);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .form-info strong { color: var(--mint-deep); }
+
+  .modal-footer {
+    padding: 16px 32px 28px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  /* ============ NOTIFICATION MODAL ============ */
+  .notification-preview {
+    background: var(--white);
+    border: 2px solid var(--plum);
+    border-radius: 20px;
+    padding: 20px;
+    margin: 16px 0;
+    position: relative;
+  }
+  .notification-preview::before {
+    content: 'SMS · Mensaje';
+    position: absolute;
+    top: -11px;
+    left: 20px;
+    background: var(--coral);
+    color: var(--cream);
+    padding: 2px 12px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .notification-preview p {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--plum);
+  }
+  .notification-preview .maps-link {
+    color: var(--coral);
+    font-weight: 600;
+    word-break: break-all;
+  }
+
+  .success-checkmark {
+    width: 64px;
+    height: 64px;
+    background: var(--mint);
+    border: 3px solid var(--plum);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 2rem;
+  }
+
+  .parent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .parent-item {
+    background: var(--cream-deep);
+    padding: 10px 14px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+  .parent-item strong { color: var(--plum); }
+  .parent-item span { color: var(--plum-soft); font-weight: 600; }
+
+  /* ============ HISTORY ============ */
+  .history-item {
+    background: var(--white);
+    border: 2px solid var(--plum);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .history-item-info h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .history-item-info p {
+    font-size: 0.82rem;
+    color: var(--plum-soft);
+  }
+  .history-empty {
+    text-align: center;
+    padding: 30px;
+    color: var(--plum-soft);
+  }
+
+  /* ============ CHATBOT ============ */
+  .chat-fab {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--coral);
+    color: var(--cream);
+    border: 3px solid var(--plum);
+    box-shadow: 0 8px 24px rgba(11, 30, 63, 0.25);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 150;
+    transition: all 0.25s ease;
+    animation: chatPulse 3s infinite;
+  }
+  @keyframes chatPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .chat-fab:hover { background: var(--coral-deep); transform: scale(1.1); animation: none; }
+  .chat-fab svg { width: 28px; height: 28px; }
+  .chat-fab .chat-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--yellow);
+    color: var(--plum);
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 100px;
+    border: 2px solid var(--plum);
+  }
+
+  .chat-window {
+    position: fixed;
+    bottom: 100px;
+    right: 24px;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    height: 560px;
+    max-height: calc(100vh - 140px);
+    background: var(--cream);
+    border: 2.5px solid var(--plum);
+    border-radius: 24px;
+    box-shadow: 12px 12px 0 var(--plum);
+    z-index: 160;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .chat-window.active {
+    display: flex;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  .chat-header {
+    background: var(--plum);
+    color: var(--cream);
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .chat-header-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chat-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--coral);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    border: 2px solid var(--cream);
+  }
+  .chat-header-text h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 1rem;
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  .chat-header-text p {
+    font-size: 0.72rem;
+    opacity: 0.75;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .chat-header-text p::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: #22c55e;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .chat-close-btn {
+    background: rgba(255,255,255,0.1);
+    color: var(--cream);
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+  }
+  .chat-close-btn:hover { background: rgba(255,255,255,0.2); }
+
+  .chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--cream);
+  }
+  .chat-bubble {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    word-wrap: break-word;
+    animation: bubbleIn 0.25s ease;
+  }
+  @keyframes bubbleIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .chat-bubble.bot {
+    background: var(--white);
+    border: 1.5px solid var(--plum);
+    align-self: flex-start;
+    border-bottom-left-radius: 6px;
+    color: var(--plum);
+  }
+  .chat-bubble.user {
+    background: var(--coral);
+    color: var(--cream);
+    align-self: flex-end;
+    border-bottom-right-radius: 6px;
+  }
+  .chat-bubble.typing {
+    display: flex;
+    gap: 4px;
+    padding: 14px 16px;
+  }
+  .chat-bubble.typing span {
+    width: 7px;
+    height: 7px;
+    background: var(--plum-soft);
+    border-radius: 50%;
+    animation: typing 1.2s infinite;
+  }
+  .chat-bubble.typing span:nth-child(2) { animation-delay: 0.15s; }
+  .chat-bubble.typing span:nth-child(3) { animation-delay: 0.3s; }
+  @keyframes typing {
+    0%, 60%, 100% { opacity: 0.3; transform: translateY(0); }
+    30% { opacity: 1; transform: translateY(-4px); }
+  }
+
+  .chat-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 16px 10px;
+  }
+  .chat-suggestion {
+    background: var(--mint);
+    border: 1.5px solid var(--plum);
+    color: var(--plum);
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .chat-suggestion:hover { background: var(--plum); color: var(--cream); }
+
+  .chat-input-area {
+    padding: 12px 16px 16px;
+    border-top: 1.5px solid rgba(11, 30, 63, 0.1);
+    background: var(--white);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .chat-input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1.5px solid var(--plum);
+    border-radius: 100px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    background: var(--cream);
+    color: var(--plum);
+    outline: none;
+    transition: all 0.2s;
+  }
+  .chat-input:focus {
+    border-color: var(--coral);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+  .chat-send {
+    background: var(--coral);
+    color: var(--cream);
+    border: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .chat-send:hover { background: var(--coral-deep); }
+  .chat-send:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ============ FOOTER ============ */
+  footer {
+    background: var(--plum);
+    color: var(--cream);
+    padding: 60px 40px 30px;
+    position: relative;
+    z-index: 2;
+  }
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  .footer-logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+  }
+  .footer-logo .italic { font-style: italic; color: var(--coral); font-weight: 600; }
+  .footer-text { font-size: 0.9rem; opacity: 0.7; max-width: 400px; }
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding-top: 24px;
+    border-top: 1px solid rgba(238, 243, 251, 0.15);
+    font-size: 0.82rem;
+    opacity: 0.6;
+    text-align: center;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    .nav-links { gap: 2px; }
+    .nav-links a, .nav-links button { padding: 6px 10px; font-size: 0.85rem; }
+    .hero { padding: 60px 20px 90px; }
+    .places-section { padding: 60px 20px 80px; }
+    .map-section { padding: 40px 20px 20px; }
+    .stats { padding: 60px 20px; }
+    .form-row { grid-template-columns: 1fr; }
+    .mission-track { font-size: 1.2rem; }
+    .modal { border-radius: 20px; }
+    .modal-header, .modal-body { padding-left: 20px; padding-right: 20px; }
+    .modal-footer { padding: 16px 20px 24px; }
+    .filter-panel { padding: 20px; border-radius: 22px; }
+    #map { height: 400px; }
+    .chat-window { bottom: 90px; right: 12px; height: 520px; }
+    .chat-fab { bottom: 16px; right: 16px; width: 56px; height: 56px; }
+  }
+
+  .place-card {
+    animation: fadeUp 0.6s ease backwards;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <span class="logo-dot"></span>
+    SO<span style="font-style:italic; color: var(--coral); font-weight:600;">BR</span>
+  </div>
+  <div class="nav-links">
+    <a href="#mapa">Mapa</a>
+    <a href="#lugares">Lugares</a>
+    <a href="#mision">Misión</a>
+    <button class="profile-pill" onclick="openProfileModal()">
+      <span id="profileBtnText">Crear perfil</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="eyebrow">Por y para jóvenes de San Luis Potosí</div>
+  <h1>
+    Salir con amigos sin <span class="italic">alcohol</span>
+    <br>sí es <span class="highlight">posible</span>.
+  </h1>
+  <p>Una guía curada de lugares reales en SLP donde la diversión no depende de una cerveza. Porque convivir, reír y pasarla bien no necesitan una copa.</p>
+  <div class="hero-cta">
+    <a href="#lugares" class="btn-primary">
+      Explorar lugares
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <button class="btn-secondary" onclick="openProfileModal()">Crear mi perfil</button>
+  </div>
+</section>
+
+<!-- MISSION STRIP -->
+<div class="mission-strip" id="mision">
+  <div class="mission-track">
+    <span>
+      Un refresco también brinda <span class="dot">●</span>
+      Reír no necesita chela <span class="dot">●</span>
+      Sin alcohol, con amigos, siempre <span class="dot">●</span>
+      Los mejores planes empiezan con un café <span class="dot">●</span>
+      Un refresco también brinda <span class="dot">●</span>
+      Reír no necesita chela <span class="dot">●</span>
+      Sin alcohol, con amigos, siempre <span class="dot">●</span>
+      Los mejores planes empiezan con un café <span class="dot">●</span>
+    </span>
+  </div>
+</div>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="totalPlaces">100+</div>
+      <div class="stat-label">Lugares reales verificados en SLP</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="totalCategories">12</div>
+      <div class="stat-label">Categorías para escoger según tu vibe</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Razones para necesitar alcohol</div>
+    </div>
+  </div>
+</section>
+
+<!-- MAP SECTION -->
+<section class="map-section" id="mapa">
+  <div class="places-header" style="margin-bottom:30px;">
+    <h2 class="section-title">Explora en el <span class="italic">mapa</span></h2>
+    <p class="section-subtitle">Todos los lugares en un solo vistazo. Los marcadores se actualizan según tus filtros.</p>
+  </div>
+  <div class="map-wrapper">
+    <div class="map-header">
+      <div class="map-header-title">
+        🗺️ San Luis Potosí
+      </div>
+      <div class="map-header-counter" id="mapCounter">100 lugares</div>
+    </div>
+    <div id="map"></div>
+  </div>
+</section>
+
+<!-- PLACES -->
+<section class="places-section" id="lugares">
+  <div class="places-header">
+    <h2 class="section-title">Encuentra tu <span class="italic">lugar</span></h2>
+    <p class="section-subtitle">Filtra por lo que tengas ganas. Puedes combinar categorías, zonas y precios.</p>
+  </div>
+
+  <!-- Filter Panel -->
+  <div class="filter-panel">
+    <div class="filter-panel-top">
+      <div class="filter-panel-title">🎯 Filtrar</div>
+      <div class="filter-results-count" id="resultsCount">0 lugares</div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-label">🍽️ Categoría</div>
+      <div class="filter-checkboxes" id="categoryFilters"></div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-label">📍 Zona</div>
+      <div class="filter-checkboxes" id="zoneFilters"></div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-label">💰 Precio</div>
+      <div class="filter-checkboxes" id="priceFilters"></div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-group-label">⭐ Rating mínimo</div>
+      <div class="filter-checkboxes" id="ratingFilters"></div>
+    </div>
+
+    <div class="filter-actions">
+      <button class="btn-clear" onclick="clearFilters()">Limpiar filtros</button>
+    </div>
+  </div>
+
+  <div class="places-grid" id="placesGrid">
+    <!-- Se llenan con JS -->
+  </div>
+</section>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Tu <span class="italic">perfil</span></div>
+        <p style="color:var(--plum-soft); font-size:0.9rem; margin-top:4px;">Pa' que tus papás sepan dónde andas.</p>
+      </div>
+      <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-info">
+        <strong>¿Por qué pedimos números?</strong> Cuando elijas un lugar, se les enviará a tus tutores la información del sitio. Así puedes salir tranqui y ellos saben dónde estás.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tu nombre</label>
+        <input type="text" class="form-input" id="userName" placeholder="Ej: Carlos">
+        <div class="form-error" id="err-userName">Escribe tu nombre porfa</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tu edad</label>
+          <input type="number" class="form-input" id="userAge" placeholder="16" min="12" max="17">
+          <div class="form-error" id="err-userAge">Edad entre 12 y 17</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tu celular</label>
+          <input type="tel" class="form-input" id="userPhone" placeholder="444 123 4567">
+          <div class="form-error" id="err-userPhone">10 dígitos, sin espacios</div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px; padding-top:20px; border-top: 2px dashed rgba(11,30,63,0.15);">
+        <label class="form-label" style="font-size:1rem; margin-bottom:12px;">Contactos de tutores <span class="helper">(mínimo 1)</span></label>
+
+        <div class="form-group">
+          <label class="form-label">Tutor 1 · Nombre</label>
+          <input type="text" class="form-input" id="parent1Name" placeholder="Ej: Mamá">
+          <div class="form-error" id="err-parent1Name">Pon cómo se llama</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tutor 1 · Celular</label>
+          <input type="tel" class="form-input" id="parent1Phone" placeholder="444 123 4567">
+          <div class="form-error" id="err-parent1Phone">10 dígitos, sin espacios</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tutor 2 · Nombre <span class="helper">(opcional)</span></label>
+          <input type="text" class="form-input" id="parent2Name" placeholder="Ej: Papá">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tutor 2 · Celular <span class="helper">(opcional)</span></label>
+          <input type="tel" class="form-input" id="parent2Phone" placeholder="444 123 4567">
+          <div class="form-error" id="err-parent2Phone">Si lo pones, que sean 10 dígitos</div>
+        </div>
+      </div>
+
+      <div id="historySection" style="margin-top:24px; padding-top:20px; border-top: 2px dashed rgba(11,30,63,0.15); display:none;">
+        <label class="form-label" style="font-size:1rem; margin-bottom:12px;">Tu historial 🕓</label>
+        <div id="historyList"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('profileModal')">Cancelar</button>
+      <button class="btn-primary" onclick="saveProfile()">Guardar perfil</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHOOSE PLACE MODAL -->
+<div class="modal-overlay" id="chooseModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Avisar a tus <span class="italic">tutores</span></div>
+        <p style="color:var(--plum-soft); font-size:0.9rem; margin-top:4px;">Se les enviará este mensaje:</p>
+      </div>
+      <button class="modal-close" onclick="closeModal('chooseModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="chooseContent"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('chooseModal')">Cancelar</button>
+      <button class="btn-primary" id="confirmChooseBtn" onclick="confirmChoose()">Enviar aviso</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal">
+    <div class="modal-body" style="text-align:center; padding:40px 32px;">
+      <div class="success-checkmark">✓</div>
+      <div class="modal-title" style="font-size:1.6rem;">Aviso <span class="italic">enviado</span></div>
+      <p style="color:var(--plum-soft); font-size:0.95rem; margin-top:12px; margin-bottom:20px;">Tus tutores ya saben a dónde vas. Ahora, a disfrutar 🙌</p>
+      <button class="btn-primary" onclick="closeModal('successModal')" style="margin: 0 auto;">Genial</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHATBOT -->
+<button class="chat-fab" id="chatFab" onclick="toggleChat()" aria-label="Abrir chatbot">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+  </svg>
+  <span class="chat-badge">IA</span>
+</button>
+
+<div class="chat-window" id="chatWindow">
+  <div class="chat-header">
+    <div class="chat-header-info">
+      <div class="chat-avatar">🤖</div>
+      <div class="chat-header-text">
+        <h4>Convi · Tu asistente</h4>
+        <p>En línea</p>
+      </div>
+    </div>
+    <button class="chat-close-btn" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-body" id="chatBody"></div>
+  <div class="chat-suggestions" id="chatSuggestions">
+    <button class="chat-suggestion" onclick="sendSuggestion('Recomiéndame un café para estudiar')">☕ Café para estudiar</button>
+    <button class="chat-suggestion" onclick="sendSuggestion('Quiero algo económico con amigos')">💸 Algo económico</button>
+    <button class="chat-suggestion" onclick="sendSuggestion('Plan para cita sin alcohol')">💘 Plan para cita</button>
+  </div>
+  <div class="chat-input-area">
+    <input type="text" class="chat-input" id="chatInput" placeholder="Escríbeme tu vibe..." onkeydown="if(event.key==='Enter')sendChatMessage()">
+    <button class="chat-send" id="chatSendBtn" onclick="sendChatMessage()" aria-label="Enviar">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-content">
+    <div>
+      <div class="footer-logo">SO<span class="italic">BR</span></div>
+      <p class="footer-text" style="margin-top:10px;">Hecho por y para jóvenes potosinos que quieren convivir sano. Porque los mejores recuerdos no necesitan una resaca.</p>
+    </div>
+    <div style="font-size:0.88rem; opacity:0.7; text-align:right;">
+      <div>San Luis Potosí, México</div>
+      <div style="margin-top:4px;">2026</div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    Todos los lugares son reales y verificados en Google Maps. Las recomendaciones son libres de alcohol o familiar-friendly.
+  </div>
+</footer>
+
+<script>
+  // ============ DATOS DE LUGARES REALES EN SLP ============
+  const PLACES = [
+    // ========= PIZZA (11) =========
+    { name: "Blue Pizzas Centro", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Pizza casual en pleno Centro Histórico. Buen precio, perfecto para caer con la banda después de pasear por la plaza.", address: "Manuel José Othón 355, Centro Histórico", zone: "centro", rating: 4.4, priceLevel: 2, tags: ["Centro", "Económico"], placeId: "ChIJJ843EQKiKoQRoCB_DejLhPc", lat: 22.1517656, lng: -100.9740655 },
+    { name: "Europizza", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Ambiente chill estilo italiano, tiene opciones vegetarianas y veganas. Muy recomendado para una cena tranquila con amigos.", address: "Juan de Oñate 670, Cuauhtémoc", zone: "poniente", rating: 4.7, priceLevel: 2, tags: ["Vegetariano", "Chill"], placeId: "ChIJl0EUdAyZKoQR_i9uNBSZGBI", lat: 22.1479755, lng: -101.0038895 },
+    { name: "Ambrosía Restaurante", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Pizzas delgadas y crujientes de alta calidad. Un lugar bonito para una ocasión especial con la familia o tu grupo.", address: "Av. Prol. Muñoz 2298, Tecnológico I", zone: "poniente", rating: 4.8, priceLevel: 2, tags: ["Top", "Familiar"], placeId: "ChIJVXPTO1WfKoQRSQgBXrePl9Y", lat: 22.1738445, lng: -101.0135519 },
+    { name: "Macadamia Pizza Garden", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Pizzas exóticas con ingredientes frescos y balanceados. La terraza es súper agradable y el servicio muy amable.", address: "Fray José de Arlegui 325, Col. Polanco", zone: "poniente", rating: 4.3, priceLevel: 2, tags: ["Terraza", "Único"], placeId: "ChIJ-aOWP0qZKoQRMLmcNsjlynY", lat: 22.1493561, lng: -101.0125184 },
+    { name: "Tiberius", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Clásico italiano en Carranza. Lasaña, pastas y pizza al horno. Buen volumen de comida y ambiente animado.", address: "Av. Venustiano Carranza 1047, Tequisquiapan", zone: "poniente", rating: 4.3, priceLevel: 2, tags: ["Italiano", "Clásico"], placeId: "ChIJe5L0p0efKoQRE5aTLMXSQ1k", lat: 22.150367, lng: -100.98859 },
+    { name: "Pizza Hut Plaza San Luis", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Cadena clásica con buffet los fines y ambiente familiar. Bueno para cuando hay antojo y quieren algo seguro.", address: "Av. Venustiano Carranza 1150, Polanco", zone: "poniente", rating: 4.2, priceLevel: 2, tags: ["Buffet", "Familiar"], placeId: "ChIJpz-Dom6fKoQRJ_nf96iQ", lat: 22.1500, lng: -100.9950 },
+    { name: "Domino's Pizza Centro", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Rápida, barata y consistente. Promos de 2x1 los martes. Ideal para pedir pa' llevar y juntarse en casa de alguien.", address: "Av. Venustiano Carranza 930, Centro", zone: "centro", rating: 4.0, priceLevel: 1, tags: ["Promos", "Económico"], placeId: "ChIJDominos1", lat: 22.1510, lng: -100.9830 },
+    { name: "La Parrocchia Pizza", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Pizza de horno de leña con masa artesanal. Su pizza margarita es fina y sabrosa. Ambiente romántico.", address: "Av. Himno Nacional 1110, Tangamanga", zone: "sur", rating: 4.5, priceLevel: 2, tags: ["Horno de leña", "Artesanal"], placeId: "ChIJParrocchia1", lat: 22.1420, lng: -100.9920 },
+    { name: "Pizzería Del Valle", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Pizzas familiares enormes y precios honestos. Está cerca de la UASLP, así que siempre hay estudiantes.", address: "Av. Dr. Manuel Nava 180, Universitaria", zone: "poniente", rating: 4.3, priceLevel: 1, tags: ["Familiar", "UASLP"], placeId: "ChIJDelValle1", lat: 22.1430, lng: -100.9780 },
+    { name: "Hola Pizza", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Pizza gourmet con opciones creativas y ensaladas frescas. Ambiente moderno, buena pa' foto.", address: "Av. Salvador Nava 2100, Tecnológico", zone: "poniente", rating: 4.6, priceLevel: 2, tags: ["Gourmet", "Moderno"], placeId: "ChIJHolaPizza1", lat: 22.1470, lng: -101.0100 },
+    { name: "Pizza La Italiana", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Pizzería de barrio con décadas de tradición. Rebanadas grandotas y precios amigables para la cartera.", address: "Av. Benito Juárez 450, Moderna", zone: "centro", rating: 4.2, priceLevel: 1, tags: ["Tradición", "Barrio"], placeId: "ChIJLaItaliana1", lat: 22.1495, lng: -100.9870 },
+
+    // ========= CAFÉS (14) =========
+    { name: "Lanthimos Barra de Café", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "El mejor café de especialidad de SLP según los reviews. Pequeño, acogedor y con muy buena cookie de chocolate.", address: "Valentín Gama 840b, Las Águilas", zone: "poniente", rating: 4.8, priceLevel: 1, tags: ["Especialidad", "Íntimo"], placeId: "ChIJb23_QeuZKoQRvrf65JYPxjQ", lat: 22.1464312, lng: -101.0079025 },
+    { name: "Arandela Coffee Bar", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Tostaduría de café con ambiente genial. Comida rica, buen precio y siempre con gente disfrutando el momento.", address: "Av. Cordillera de los Himalaya 250, Garita de Jalisco", zone: "sur", rating: 4.6, priceLevel: 1, tags: ["Popular", "Económico"], placeId: "ChIJYZ53v9uYKoQRtSR7IxUfwvY", lat: 22.1338018, lng: -101.0189081 },
+    { name: "KAFFEE KUNST BERLÍN", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Cafetería estilo alemán en el Centro, con panadería y postres que son obras de arte. Ideal para estudiar o platicar.", address: "Avenida Universidad 133, Centro Histórico", zone: "centro", rating: 4.6, priceLevel: 2, tags: ["Centro", "Estudio"], placeId: "ChIJgVl_KVqjKoQROxuQpp9F_UY", lat: 22.1492746, lng: -100.9785404 },
+    { name: "ConSentido Café", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Brunch, latte de mazapán y crepas de fruta. Ambiente positivo y perfecto pa' ir con amigos un sábado.", address: "Av. Nicolás Zapata 1505, Parque España 2da Secc", zone: "poniente", rating: 4.8, priceLevel: 2, tags: ["Brunch", "Top"], placeId: "ChIJsWAhQ9yfKoQRYs-hUernbAM", lat: 22.1534071, lng: -101.0050592 },
+    { name: "Cielito Querido Café", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Cadena mexicana con estética colorida y muy instagrameable. Frappes, chocolates calientes y pan dulce.", address: "Av. Venustiano Carranza 1150, Polanco", zone: "poniente", rating: 4.5, priceLevel: 2, tags: ["Mexicano", "Estética"], placeId: "ChIJCielito1", lat: 22.1498, lng: -100.9990 },
+    { name: "Starbucks Centro SLP", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "El clásico para trabajar con laptop o pasar el rato. Wifi gratis y lugar amplio, en plena Plaza de Armas.", address: "Plaza de Armas, Centro Histórico", zone: "centro", rating: 4.4, priceLevel: 2, tags: ["Wifi", "Centro"], placeId: "ChIJStarbucks1", lat: 22.1514, lng: -100.9760 },
+    { name: "El Café Tradicional SLP", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Desayunos tipo cafetería con enchiladas potosinas, chilaquiles y café de olla. Perfecto pa' desayunar un domingo.", address: "Vallejo 225, Centro", zone: "centro", rating: 4.6, priceLevel: 2, tags: ["Desayuno", "Tradicional"], placeId: "ChIJCafeTradicional1", lat: 22.1520, lng: -100.9770 },
+    { name: "Café Cortao", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Cafetería hipster con granos de especialidad y pan artesanal. Buen lugar para estudiar con tus cuates.", address: "Fray Diego de la Magdalena 120, Tequis", zone: "centro", rating: 4.7, priceLevel: 2, tags: ["Hipster", "Estudio"], placeId: "ChIJCafeCortao1", lat: 22.1530, lng: -100.9810 },
+    { name: "La Posada del Virrey", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Café con historia en un edificio colonial del Centro. Ambiente elegante, ideal pa' impresionar a alguien.", address: "Jardín Hidalgo 3, Centro Histórico", zone: "centro", rating: 4.5, priceLevel: 2, tags: ["Histórico", "Elegante"], placeId: "ChIJPosadaVirrey1", lat: 22.1516, lng: -100.9758 },
+    { name: "Brunchero Café", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Especialistas en brunch: hotcakes esponjosos, huevos benedictinos y bowls saludables. Muy fotogénico.", address: "Av. Chapultepec 830, Del Llano", zone: "poniente", rating: 4.7, priceLevel: 2, tags: ["Brunch", "Healthy"], placeId: "ChIJBrunchero1", lat: 22.1540, lng: -101.0010 },
+    { name: "Café Pacífico", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Coffee shop con terraza y pet-friendly. Buenísimos matchas y affogatos. Ambiente súper relajado.", address: "Av. Salvador Nava 1650, Jardín", zone: "poniente", rating: 4.6, priceLevel: 2, tags: ["Pet-friendly", "Terraza"], placeId: "ChIJCafePacifico1", lat: 22.1478, lng: -101.0080 },
+    { name: "La Cafetera SLP", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Café artesanal tostado ahí mismo. El barista te explica los cortes. Muy educativo y sabroso.", address: "Independencia 720, Centro", zone: "centro", rating: 4.8, priceLevel: 2, tags: ["Artesanal", "Top"], placeId: "ChIJLaCafetera1", lat: 22.1505, lng: -100.9790 },
+    { name: "Mokai Café", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Café con ambiente tropical, plantas por todos lados. Buenísimas limonadas y sándwiches.", address: "Av. Dr. Manuel Nava 250, Universitaria", zone: "poniente", rating: 4.5, priceLevel: 2, tags: ["Tropical", "UASLP"], placeId: "ChIJMokai1", lat: 22.1440, lng: -100.9800 },
+    { name: "Caffenio Drive", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Café drive-thru al estilo norte. Rápido y con malteadas enormes. Perfecto pa' desvelados y mañaneros.", address: "Av. Salk 560, Lomas", zone: "poniente", rating: 4.3, priceLevel: 1, tags: ["Drive-thru", "Malteadas"], placeId: "ChIJCaffenio1", lat: 22.1525, lng: -101.0070 },
+
+    // ========= BILLAR (6) =========
+    { name: "Billar Inn Tangamanga", category: "billar", categoryLabel: "Billar", emoji: "🎱", description: "Mesas en buen estado, ambiente familiar y precio razonable ($42 por hora). El clásico para jugar unas rondas con los cuates.", address: "Av Himno Nacional 2075, Tangamanga", zone: "sur", rating: 4.4, priceLevel: 1, tags: ["Familiar", "Económico"], placeId: "ChIJMQQBbLCYKoQRrqqMGOutzwI", lat: 22.1407612, lng: -100.9937575 },
+    { name: "Billares Michelle's", category: "billar", categoryLabel: "Billar", emoji: "🎱", description: "Considerado de los mejores billares de la ciudad. Mesas de lujo, ambiente familiar, torneos y buen servicio.", address: "Av. Damián Carmona 1440, Barrio de Santiago", zone: "centro", rating: 4.6, priceLevel: 1, tags: ["Top", "Torneos"], placeId: "ChIJ3TK7ZOihKoQRd61zqMsrS6g", lat: 22.1652426, lng: -100.980319 },
+    { name: "Billarinn Soledad", category: "billar", categoryLabel: "Billar", emoji: "🎱", description: "Uno de los billares más adecuados de la zona de Soledad. Ambiente familiar y precios iguales a otros lados.", address: "Miguel Hidalgo 634c, Soledad de Graciano Sánchez", zone: "soledad", rating: 4.1, priceLevel: 1, tags: ["Soledad", "Familiar"], placeId: "ChIJI4mJd7uhKoQRfRR2Zmi4unk", lat: 22.1847414, lng: -100.9495699 },
+    { name: "Billar La Estrella", category: "billar", categoryLabel: "Billar", emoji: "🎱", description: "Mesas de pool y carambola, abre hasta tarde. Ambiente más adulto pero permiten menores acompañados.", address: "Av. Muñoz 1200, Tequis", zone: "centro", rating: 4.3, priceLevel: 1, tags: ["Pool", "Carambola"], placeId: "ChIJBillarEstrella1", lat: 22.1545, lng: -100.9830 },
+    { name: "Pool Club SLP", category: "billar", categoryLabel: "Billar", emoji: "🎱", description: "Club de pool con torneos amateurs y liga juvenil. Buen lugar para aprender y jugar en serio.", address: "Av. Sierra Leona 780, Lomas 3ra", zone: "poniente", rating: 4.5, priceLevel: 2, tags: ["Torneos", "Liga"], placeId: "ChIJPoolClub1", lat: 22.1570, lng: -101.0120 },
+    { name: "Billar El Rey", category: "billar", categoryLabel: "Billar", emoji: "🎱", description: "Clásico billar de colonia. Mesas bien cuidadas y buena clientela. Precio $35/hr, súper accesible.", address: "Av. Venustiano Carranza 2450, Balcones", zone: "poniente", rating: 4.2, priceLevel: 1, tags: ["Clásico", "Económico"], placeId: "ChIJBillarRey1", lat: 22.1560, lng: -101.0090 },
+
+    // ========= POSTRES / HELADOS (10) =========
+    { name: "Helados del Abuelo", category: "postres", categoryLabel: "Postres", emoji: "🍦", description: "Helados naturales con variedad de sabores. Prueba el mamey y dulce de leche. Clásico del Centro.", address: "Ignacio Zaragoza 504, Centro", zone: "centro", rating: 4.5, priceLevel: 1, tags: ["Natural", "Centro"], placeId: "ChIJuzw5ewGiKoQRNZM3ntQTsuw", lat: 22.149058, lng: -100.975504 },
+    { name: "Helados y Postres Bonissimo", category: "postres", categoryLabel: "Postres", emoji: "🍦", description: "Mochi, ice cream milkshakes, affogato y café. Pet-friendly y buen espacio para estudiar o platicar.", address: "Amado Nervo 1300, Lindavista", zone: "poniente", rating: 4.8, priceLevel: 2, tags: ["Mochi", "Top"], placeId: "ChIJT87pszSfKoQRTmM_iocpiu8", lat: 22.1507903, lng: -101.0079417 },
+    { name: "Nevería Alaska", category: "postres", categoryLabel: "Postres", emoji: "🍦", description: "Nevería tradicional dentro del Mercado de La Merced. Precios accesibles y sabores con fruta natural.", address: "Mercado de La Merced, Calz. de Guadalupe", zone: "centro", rating: 4.2, priceLevel: 1, tags: ["Tradicional", "Mercado"], placeId: "ChIJt3otW-2hKoQRipKZsI7CDU8", lat: 22.1461957, lng: -100.9741616 },
+    { name: "Don Rafael Herencia Michoacana", category: "postres", categoryLabel: "Postres", emoji: "🍦", description: "Crepas, helados michoacanos, frappes y más. Andador Zaragoza, perfecto para un antojito en el Centro.", address: "Andador Zaragoza 755, Centro", zone: "centro", rating: 4.7, priceLevel: 1, tags: ["Centro", "Crepas"], placeId: "ChIJNVymdcyjKoQRWaf_hYHAZC0", lat: 22.1478147, lng: -100.9749813 },
+    { name: "Sta. Elena", category: "postres", categoryLabel: "Postres", emoji: "🍦", description: "Paletas y helados con fruta natural de calidad. Servicio súper amable, ideal pa' una tarde tranquila.", address: "Antonio de Otahegi 295", zone: "poniente", rating: 4.8, priceLevel: 1, tags: ["Natural", "Top"], placeId: "ChIJ3x8CZPihKoQRziWt_7uPovk", lat: 22.1540562, lng: -100.9718346 },
+    { name: "La Michoacana Premium", category: "postres", categoryLabel: "Postres", emoji: "🍦", description: "Paletas con fruta natural y chamoyadas enormes. Clásico mexicano, bueno pa' el calor del verano.", address: "Av. Venustiano Carranza 850, Centro", zone: "centro", rating: 4.4, priceLevel: 1, tags: ["Paletas", "Chamoyada"], placeId: "ChIJMichoacana1", lat: 22.1510, lng: -100.9850 },
+    { name: "Cheesecake Factory SLP", category: "postres", categoryLabel: "Postres", emoji: "🧁", description: "Pastelitos, cheesecakes y postres gourmet. Lugar pequeño con vibe dulce. Súper pa' cerrar una cena rica.", address: "Av. Chapultepec 540, Del Llano", zone: "poniente", rating: 4.7, priceLevel: 2, tags: ["Cheesecake", "Gourmet"], placeId: "ChIJCheesecake1", lat: 22.1535, lng: -101.0020 },
+    { name: "Dolce Vita Gelato", category: "postres", categoryLabel: "Postres", emoji: "🍨", description: "Gelato italiano auténtico con sabores únicos como pistache siciliano. Lugar chiquito pero top.", address: "Av. Himno Nacional 1850, Lomas", zone: "poniente", rating: 4.8, priceLevel: 2, tags: ["Italiano", "Gelato"], placeId: "ChIJDolceVita1", lat: 22.1452, lng: -101.0040 },
+    { name: "Waffle Time", category: "postres", categoryLabel: "Postres", emoji: "🧇", description: "Waffles dulces con combos de Nutella, fresa y crema batida. Decoración kawaii, muy fotogénico.", address: "Plaza Sendero, Prolongación Muñoz", zone: "poniente", rating: 4.5, priceLevel: 2, tags: ["Kawaii", "Waffles"], placeId: "ChIJWaffleTime1", lat: 22.1730, lng: -101.0150 },
+    { name: "Repostería La Concha", category: "postres", categoryLabel: "Postres", emoji: "🥐", description: "Pan dulce artesanal, conchas rellenas y panque de elote. Lo mejor pa' un café de tarde con amigos.", address: "Juárez 520, Centro", zone: "centro", rating: 4.6, priceLevel: 1, tags: ["Pan dulce", "Artesanal"], placeId: "ChIJLaConcha1", lat: 22.1522, lng: -100.9820 },
+
+    // ========= BOBA (6) =========
+    { name: "Boba SLP Centro", category: "boba", categoryLabel: "Boba Tea", emoji: "🧋", description: "Decorado lindo, tienen juegos de mesa y espejos para fotos. El de Oreo y el de mora con queso son los top.", address: "Av. Damián Carmona 405C, Centro", zone: "centro", rating: 4.6, priceLevel: 2, tags: ["Centro", "Juegos"], placeId: "ChIJoVMGKKmhKoQRYKg6K7Nx09g", lat: 22.1539566, lng: -100.9790211 },
+    { name: "Bute", category: "boba", categoryLabel: "Boba Tea", emoji: "🧋", description: "El mejor boba de SLP según los fans de la tapioca. Gran variedad de sabores, precios accesibles y tarjeta de cliente frecuente.", address: "C. del Parque 200, Fuentes del Bosque", zone: "poniente", rating: 4.2, priceLevel: 1, tags: ["Variedad", "Top"], placeId: "ChIJeYKDiUCfKoQRh57AIwP33Zc", lat: 22.151592, lng: -101.013404 },
+    { name: "Boba SLP Carranza", category: "boba", categoryLabel: "Boba Tea", emoji: "🧋", description: "Dentro del Food Park SLP. Gran variedad de toppings, ambiente fresa y área grande pa' caer con la banda.", address: "Av. Venustiano Carranza 1650, Col del Valle", zone: "poniente", rating: 4.4, priceLevel: 2, tags: ["Food Park", "Carranza"], placeId: "ChIJn47SIUyZKoQRXN1AwX0ayEg", lat: 22.1498849, lng: -101.0004165 },
+    { name: "Bubble Way", category: "boba", categoryLabel: "Boba Tea", emoji: "🧋", description: "Boba con frutas frescas y opciones vegana. Decoración kawaii con peluches gigantes para fotos.", address: "Av. Salvador Nava 1230, Jardín", zone: "poniente", rating: 4.5, priceLevel: 2, tags: ["Kawaii", "Vegano"], placeId: "ChIJBubbleWay1", lat: 22.1483, lng: -101.0050 },
+    { name: "Tea Spot", category: "boba", categoryLabel: "Boba Tea", emoji: "🧋", description: "Tés fríos y calientes con opciones asiáticas y mexicanas. Tienen matcha de primera calidad.", address: "Plaza Citadella, Av. Chapultepec", zone: "poniente", rating: 4.6, priceLevel: 2, tags: ["Matcha", "Asiático"], placeId: "ChIJTeaSpot1", lat: 22.1548, lng: -101.0000 },
+    { name: "Boba Station", category: "boba", categoryLabel: "Boba Tea", emoji: "🧋", description: "Cadena de boba con más de 40 sabores y sistema de puntos. Está en varias plazas, siempre hay una cerca.", address: "Plaza Tangamanga II, Local 15", zone: "sur", rating: 4.3, priceLevel: 1, tags: ["40 sabores", "Puntos"], placeId: "ChIJBobaStation1", lat: 22.1380, lng: -100.9900 },
+
+    // ========= HAMBURGUESAS (9) =========
+    { name: "Bistrucknomia", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Hamburguesas originales como la Norteña. Servicio excepcional, música chida y ambiente muy familiar.", address: "Av. Hernán Cortes 285, Los Reyes", zone: "poniente", rating: 4.8, priceLevel: 2, tags: ["Original", "Top"], placeId: "ChIJh9lnLUGfKoQRg2HQGz3BC-g", lat: 22.1706365, lng: -100.9962773 },
+    { name: "Burgeros", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Hamburguesas con videojuegos y juegos de mesa en el local. Literal el plan completo: comer + jugar arcade.", address: "Calz de Guadalupe 1815, Santuario", zone: "centro", rating: 4.6, priceLevel: 2, tags: ["Arcade", "Juegos"], placeId: "ChIJI2joEW2iKoQRjquKjoCppRg", lat: 22.1275504, lng: -100.9673593 },
+    { name: "La Buena Burger", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Hamburguesas 100% carne con vista a Plaza del Carmen. Área de juegos y ambiente juvenil-familiar.", address: "Mariano Escobedo 335, Centro Histórico", zone: "centro", rating: 4.0, priceLevel: 2, tags: ["Centro", "Vista"], placeId: "ChIJef3F1mOjKoQRtcAN6a0_F9U", lat: 22.1514656, lng: -100.9746787 },
+    { name: "Hamburguesas Juan del Jarro", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Hamburguesas al estilo mexicano (de arrachera, pollo, res). Lugar familiar chico con atención personalizada.", address: "Juan del Jarro 351, Damián Carmona", zone: "centro", rating: 4.6, priceLevel: 1, tags: ["Mexicano", "Económico"], placeId: "ChIJJ5YyFUifKoQRkOpBmKPWZIg", lat: 22.1694313, lng: -100.9830057 },
+    { name: "Smash Burger SLP", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Smash burgers al estilo americano con queso derretido. Malteadas de postre. Porciones generosas.", address: "Av. Salvador Nava 1820, Tecnológico", zone: "poniente", rating: 4.7, priceLevel: 2, tags: ["Smash", "Malteadas"], placeId: "ChIJSmashBurger1", lat: 22.1475, lng: -101.0115 },
+    { name: "Burger Joint", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Hamburguesas gourmet con aioli casero y pan brioche. Precio medio-alto pero vale la pena el antojo.", address: "Plaza Citadella, Av. Chapultepec", zone: "poniente", rating: 4.6, priceLevel: 3, tags: ["Gourmet", "Brioche"], placeId: "ChIJBurgerJoint1", lat: 22.1545, lng: -101.0005 },
+    { name: "Patty's Burger", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Hamburguesas enormes y economía que alegra. El combo con papas y refresco es un caso a pensar.", address: "Av. Muñoz 890, Moderna", zone: "centro", rating: 4.4, priceLevel: 1, tags: ["Económico", "Abundante"], placeId: "ChIJPattysBurger1", lat: 22.1540, lng: -100.9860 },
+    { name: "The Butcher's Burger", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Carne seleccionada por un carnicero, tocino de la casa y papas trufadas. Para ocasiones especiales.", address: "Av. Sierra Leona 990, Lomas 3ra", zone: "poniente", rating: 4.8, priceLevel: 3, tags: ["Premium", "Trufa"], placeId: "ChIJButchersBurger1", lat: 22.1572, lng: -101.0140 },
+    { name: "Fast Burger", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Versión rápida pa' antojo express. Hamburguesas de $50 con papas. Bueno pa' cuando anda justa la cartera.", address: "Av. Benito Juárez 1250, Providencia", zone: "centro", rating: 4.1, priceLevel: 1, tags: ["Express", "Barato"], placeId: "ChIJFastBurger1", lat: 22.1488, lng: -100.9925 },
+
+    // ========= ARCADE / JUEGOS (7) =========
+    { name: "Circus Park Col del Valle", category: "arcade", categoryLabel: "Arcade", emoji: "🎮", description: "Parque de máquinas y juegos. El lugar ideal para un plan con primos, amigos o cita diferente.", address: "Av Nereo Rodríguez Barragán 450, Col del Valle", zone: "poniente", rating: 4.5, priceLevel: 2, tags: ["Juegos", "Familiar"], placeId: "ChIJt3oia0qfKoQRIWK6sMTnOoU", lat: 22.155075, lng: -101.0049233 },
+    { name: "Circus Park Soledad", category: "arcade", categoryLabel: "Arcade", emoji: "🎮", description: "Sucursal en Soledad con máquinas para jóvenes y niños. Pequeño pero divertido, buena opción para pasar el rato.", address: "Lat. Carr. San Luis - Matehuala 3600, Soledad", zone: "soledad", rating: 4.4, priceLevel: 2, tags: ["Soledad", "Juegos"], placeId: "ChIJFySSXLyhKoQR3rHCmm9KF9Q", lat: 22.182181, lng: -100.9506316 },
+    { name: "Diverzone SAN LUIS", category: "arcade", categoryLabel: "Arcade", emoji: "🎮", description: "Tienda de máquinas y reparación de arcade. Buen ambiente y precio, variedad de juegos clásicos.", address: "Av. José de Gálvez 640-a, Ricardo B. Anaya", zone: "norte", rating: 4.0, priceLevel: 1, tags: ["Clásicos", "Reparación"], placeId: "ChIJF037nc6jKoQRi4gNNxocTH0", lat: 22.138529, lng: -100.9246128 },
+    { name: "Fun City Plaza Sendero", category: "arcade", categoryLabel: "Arcade", emoji: "🎮", description: "Juegos mecánicos, simuladores y máquinas de garras. Plan perfecto con primos o entre compas.", address: "Plaza Sendero, Prol. Muñoz", zone: "poniente", rating: 4.3, priceLevel: 2, tags: ["Simuladores", "Plaza"], placeId: "ChIJFunCity1", lat: 22.1732, lng: -101.0150 },
+    { name: "Recrearte Arcade", category: "arcade", categoryLabel: "Arcade", emoji: "🎮", description: "Arcade + boliche + karaoke. Plan de día completo pa' grupos grandes de amigos o cumpleaños.", address: "Av. Himno Nacional 1500, Tangamanga", zone: "sur", rating: 4.6, priceLevel: 2, tags: ["Boliche", "Karaoke"], placeId: "ChIJRecrearte1", lat: 22.1425, lng: -100.9940 },
+    { name: "Retro Games SLP", category: "arcade", categoryLabel: "Arcade", emoji: "👾", description: "Arcade retro con máquinas de los 80s-90s. Entras y sientes que es otra época. Torneos de Street Fighter.", address: "Av. Benito Juárez 340, Moderna", zone: "centro", rating: 4.7, priceLevel: 1, tags: ["Retro", "Torneos"], placeId: "ChIJRetroGames1", lat: 22.1498, lng: -100.9895 },
+    { name: "VR Experience SLP", category: "arcade", categoryLabel: "Arcade", emoji: "🥽", description: "Realidad virtual con juegos de terror, deportes y aventura. Plan único y distinto a lo clásico.", address: "Plaza Citadella, Av. Chapultepec", zone: "poniente", rating: 4.8, priceLevel: 3, tags: ["VR", "Único"], placeId: "ChIJVRExperience1", lat: 22.1550, lng: -101.0010 },
+
+    // ========= CREPAS / WAFFLES (8) =========
+    { name: "Vishuddha Crepas Carranza", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "Crepas dulces y saladas + café, en pleno Carranza. Combos económicos para la noche y ambiente relajado.", address: "Av. Venustiano Carranza 550, Centro", zone: "centro", rating: 4.8, priceLevel: 2, tags: ["Top", "Carranza"], placeId: "ChIJTRqInTGZKoQR9nhFZNXF5ZM", lat: 22.1513183, lng: -100.9817254 },
+    { name: "Vishuddha Crepas B. Anaya", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "La sucursal de Anaya, igual de top que la del Centro. Pide un frappe + crepa y viaje directo al paraíso.", address: "Fray G. Eslava 106, Ricardo B. Anaya", zone: "norte", rating: 4.8, priceLevel: 2, tags: ["Top", "Zona Anaya"], placeId: "ChIJhSXgps2jKoQRUy5W6TmOF4I", lat: 22.1420036, lng: -100.9324245 },
+    { name: "Crepería & Waffles Kikines", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "Waffles y crepas a buen precio. Frappes con ingredientes de calidad. Menú variado, opción amplia.", address: "Paseo del Valle de San Francisco 228, Los Silos", zone: "norte", rating: 4.4, priceLevel: 1, tags: ["Económico", "Frappes"], placeId: "ChIJ3cbEXNKjKoQRAHqo6La_LSU", lat: 22.1282213, lng: -100.9008752 },
+    { name: "Covent Garden Café Y Crepas", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "Crepas, café y té en el Centro Histórico. Espacio chico, acogedor, ideal pa' ir con tu crush o mejor amigo.", address: "Mariano Arista 240, Centro Histórico", zone: "centro", rating: 4.6, priceLevel: 2, tags: ["Centro", "Íntimo"], placeId: "ChIJJzOsnP-hKoQRalDvIT4idBk", lat: 22.1533316, lng: -100.9782025 },
+    { name: "Cafetería Blue Berry", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "Cafetería con crepas, helados y variedad de malteadas. Lugar acogedor y platillos con buena presentación.", address: "Cto. Granjas Nte. 311, Industrial Aviación", zone: "norte", rating: 4.5, priceLevel: 1, tags: ["Malteadas", "Acogedor"], placeId: "ChIJo4ofaRWfKoQR9cr9bhTc0LA", lat: 22.1750957, lng: -101.0050046 },
+    { name: "Crepería Francesa SLP", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "Recetas francesas auténticas con mantequilla de calidad. Intenta la crepe Suzette con naranja flameada sin alcohol.", address: "Av. Chapultepec 450, Del Llano", zone: "poniente", rating: 4.7, priceLevel: 2, tags: ["Francés", "Auténtico"], placeId: "ChIJCreperiaFrancesa1", lat: 22.1537, lng: -101.0025 },
+    { name: "Crepitas y Waffles", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "Crepas caseras con combos a $65 incluyendo bebida. Plan perfecto pa' cuando la mensualidad ya no alcanza.", address: "Av. Muñoz 1680, Providencia", zone: "centro", rating: 4.3, priceLevel: 1, tags: ["Combos", "Barato"], placeId: "ChIJCrepitasWaffles1", lat: 22.1555, lng: -100.9910 },
+    { name: "Waffles House SLP", category: "crepas", categoryLabel: "Crepas", emoji: "🧇", description: "Waffles belgas esponjosos con frutas y helado. Desayuno hasta las 4pm. Muy pa' un sábado tardío.", address: "Av. Salvador Nava 980, Universitaria", zone: "poniente", rating: 4.5, priceLevel: 2, tags: ["Belga", "Brunch"], placeId: "ChIJWafflesHouse1", lat: 22.1460, lng: -101.0075 },
+
+    // ========= TACOS / STREET FOOD (8) =========
+    { name: "Tacos Los Güeros", category: "tacos", categoryLabel: "Tacos", emoji: "🌮", description: "Tacos al pastor clásicos con piña recién cortada. La salsa verde es peligrosa pero adictiva.", address: "Av. Venustiano Carranza 1420, Polanco", zone: "poniente", rating: 4.7, priceLevel: 1, tags: ["Pastor", "Clásico"], placeId: "ChIJTacosGueros1", lat: 22.1505, lng: -100.9980 },
+    { name: "Enchiladas Potosinas La Plaza", category: "tacos", categoryLabel: "Tacos", emoji: "🌮", description: "Las enchiladas potosinas típicas, con queso y salsa roja. Tradición pura, muy potosino.", address: "Jardín Hidalgo 25, Centro Histórico", zone: "centro", rating: 4.8, priceLevel: 1, tags: ["Potosino", "Tradición"], placeId: "ChIJEnchiladasPot1", lat: 22.1518, lng: -100.9763 },
+    { name: "Tacos El Compadre", category: "tacos", categoryLabel: "Tacos", emoji: "🌮", description: "Tacos de guisado con arroz y frijoles de regalo. Atiende hasta las 2am, bueno pa' los desvelados.", address: "Av. Himno Nacional 1690, Tangamanga", zone: "sur", rating: 4.5, priceLevel: 1, tags: ["Guisado", "Trasnoche"], placeId: "ChIJTacosCompadre1", lat: 22.1418, lng: -100.9920 },
+    { name: "Gorditas Doña Tere", category: "tacos", categoryLabel: "Tacos", emoji: "🫓", description: "Gorditas de maíz hechas a mano con rellenos tradicionales. Buenísimas y rinden por el precio.", address: "Mercado República, Centro", zone: "centro", rating: 4.7, priceLevel: 1, tags: ["Gorditas", "Tradicional"], placeId: "ChIJGorditasTere1", lat: 22.1468, lng: -100.9745 },
+    { name: "Quesadillas El Güero", category: "tacos", categoryLabel: "Tacos", emoji: "🌮", description: "Quesadillas gigantes con tortilla azul y rellenos de huitlacoche, flor de calabaza. Mucha banda universitaria.", address: "Av. Dr. Manuel Nava 420, Universitaria", zone: "poniente", rating: 4.6, priceLevel: 1, tags: ["UASLP", "Tortilla azul"], placeId: "ChIJQuesadillasGuero1", lat: 22.1445, lng: -100.9795 },
+    { name: "Tortas La Cuponera", category: "tacos", categoryLabel: "Tacos", emoji: "🥪", description: "Tortas gigantes tipo mexicano con aguacate, jamón, queso de puerco. Alcanza pa' compartir fácil.", address: "Av. Benito Juárez 520, Moderna", zone: "centro", rating: 4.5, priceLevel: 1, tags: ["Tortas", "Abundante"], placeId: "ChIJTortasCuponera1", lat: 22.1495, lng: -100.9880 },
+    { name: "Street Food Corner", category: "tacos", categoryLabel: "Tacos", emoji: "🌮", description: "Esquina con 4 puestos diferentes: tacos, tortas, gringas y tostadas. Ambiente callejero bien chido.", address: "Cruce Muñoz y Obregón, Centro", zone: "centro", rating: 4.4, priceLevel: 1, tags: ["Variedad", "Callejero"], placeId: "ChIJStreetFood1", lat: 22.1528, lng: -100.9835 },
+    { name: "Tacos El Norteño", category: "tacos", categoryLabel: "Tacos", emoji: "🌮", description: "Tacos de asada de carne de primera, tortillas de harina del norte. Sirven refrescos mexicanos en vitrolero.", address: "Av. Chapultepec 720, Del Llano", zone: "poniente", rating: 4.7, priceLevel: 2, tags: ["Norteño", "Asada"], placeId: "ChIJTacosNorteno1", lat: 22.1541, lng: -101.0015 },
+
+    // ========= PARQUES / AIRE LIBRE (6) =========
+    { name: "Parque Tangamanga I", category: "parque", categoryLabel: "Parque", emoji: "🌳", description: "El parque más grande de la ciudad. Lagos, pista para correr, bici, patines y tirolesa. Plan familiar top.", address: "Av. Diagonal Sur s/n, Tangamanga", zone: "sur", rating: 4.8, priceLevel: 1, tags: ["Gigante", "Familiar"], placeId: "ChIJTangamangaI1", lat: 22.1360, lng: -101.0110 },
+    { name: "Parque Tangamanga II", category: "parque", categoryLabel: "Parque", emoji: "🌳", description: "Parque tranquilo con canchas, área de perros y gimnasio al aire libre. Menos concurrido que el I.", address: "Av. Juan Pablo II, Tangamanga II", zone: "sur", rating: 4.6, priceLevel: 1, tags: ["Canchas", "Tranquilo"], placeId: "ChIJTangamangaII1", lat: 22.1385, lng: -100.9850 },
+    { name: "Jardín Hidalgo (Plaza de Armas)", category: "parque", categoryLabel: "Parque", emoji: "🏛️", description: "Plaza principal del Centro. Catedral al frente, bancas, kiosko y eventos culturales los fines. Un clásico.", address: "Centro Histórico, SLP", zone: "centro", rating: 4.8, priceLevel: 1, tags: ["Centro", "Cultural"], placeId: "ChIJJardinHidalgo1", lat: 22.1516, lng: -100.9757 },
+    { name: "Alameda Juan Sarabia", category: "parque", categoryLabel: "Parque", emoji: "🌲", description: "Alameda con arboledas, lago con patos y juegos infantiles. Tardes de fin bien chidas aquí.", address: "Av. Universidad, Centro", zone: "centro", rating: 4.6, priceLevel: 1, tags: ["Lago", "Arboledas"], placeId: "ChIJAlameda1", lat: 22.1495, lng: -100.9720 },
+    { name: "Parque de Morales", category: "parque", categoryLabel: "Parque", emoji: "🌳", description: "Parque de barrio con explanada y juegos. Los viernes hay tianguis con antojitos y artesanías.", address: "Av. Morelos 1200, Morales", zone: "centro", rating: 4.4, priceLevel: 1, tags: ["Tianguis", "Barrio"], placeId: "ChIJParqueMorales1", lat: 22.1610, lng: -100.9910 },
+    { name: "Presa San José", category: "parque", categoryLabel: "Parque", emoji: "🏞️", description: "Presa con vista panorámica de la ciudad. Se puede caminar alrededor y hay botes de pedal. Plan atardecer.", address: "Carretera a La Presa, Poniente", zone: "poniente", rating: 4.7, priceLevel: 1, tags: ["Vista", "Atardecer"], placeId: "ChIJPresaSanJose1", lat: 22.1620, lng: -101.0250 },
+
+    // ========= DEPORTIVOS / ACTIVIDADES (8) =========
+    { name: "Bowling Plaza Tangamanga", category: "deporte", categoryLabel: "Deportes", emoji: "🎳", description: "Boliche con 20 pistas, renta de zapatos y comida. Perfecto pa' cumpleaños o grupos de 6+.", address: "Plaza Tangamanga II, L. 30", zone: "sur", rating: 4.5, priceLevel: 2, tags: ["Boliche", "Grupos"], placeId: "ChIJBowlingTangamanga1", lat: 22.1380, lng: -100.9895 },
+    { name: "Escalada Indoor SLP", category: "deporte", categoryLabel: "Deportes", emoji: "🧗", description: "Muro de escalada con rutas para principiantes y avanzados. Primera clase gratis, súper recomendado.", address: "Av. Industrias 1850, Zona Ind.", zone: "norte", rating: 4.8, priceLevel: 2, tags: ["Escalada", "Principiante"], placeId: "ChIJEscaladaIndoor1", lat: 22.1680, lng: -100.9580 },
+    { name: "Karting San Luis", category: "deporte", categoryLabel: "Deportes", emoji: "🏎️", description: "Pista de go-karts con velocidades hasta 60km/h. Plan adrenalínico pa' cumpleañeros o equipos.", address: "Carretera a Zacatecas km 5", zone: "poniente", rating: 4.7, priceLevel: 3, tags: ["Karts", "Adrenalina"], placeId: "ChIJKarting1", lat: 22.1750, lng: -101.0350 },
+    { name: "Paintball Potosino", category: "deporte", categoryLabel: "Deportes", emoji: "🎯", description: "Paintball en campo abierto con obstáculos. Paquetes para 6-20 personas. Lleva ropa que puedas ensuciar.", address: "Camino a La Pila km 3", zone: "sur", rating: 4.6, priceLevel: 2, tags: ["Paintball", "Grupos"], placeId: "ChIJPaintball1", lat: 22.1200, lng: -100.9700 },
+    { name: "Canchas Futbol 7 Arena", category: "deporte", categoryLabel: "Deportes", emoji: "⚽", description: "Canchas sintéticas bien iluminadas. Renta por hora y ligas juveniles. Vestidores y tienda.", address: "Av. Himno Nacional 2250, Tangamanga", zone: "sur", rating: 4.5, priceLevel: 2, tags: ["Fútbol", "Ligas"], placeId: "ChIJCanchasFutbol1", lat: 22.1395, lng: -100.9945 },
+    { name: "Laser Tag Extreme", category: "deporte", categoryLabel: "Deportes", emoji: "🔫", description: "Laser tag en arena oscura con luces neón. Rondas de 20 minutos. Perfecto pa' grupos de amigos.", address: "Plaza Sendero, Prol. Muñoz", zone: "poniente", rating: 4.4, priceLevel: 2, tags: ["Láser", "Neón"], placeId: "ChIJLaserTag1", lat: 22.1735, lng: -101.0155 },
+    { name: "Trampolín Park SLP", category: "deporte", categoryLabel: "Deportes", emoji: "🤸", description: "Parque de trampolines, piscina de cubos y pared ninja warrior. Un divertidón total.", address: "Av. Sierra Leona 1350, Lomas", zone: "poniente", rating: 4.7, priceLevel: 2, tags: ["Trampolín", "Ninja"], placeId: "ChIJTrampolin1", lat: 22.1575, lng: -101.0130 },
+    { name: "Patinaje Sobre Hielo Plaza", category: "deporte", categoryLabel: "Deportes", emoji: "⛸️", description: "Pista de patinaje sobre hielo temporal (nov-ene). Renta de patines y música. Ambiente navideño.", address: "Plaza de Armas, Centro", zone: "centro", rating: 4.6, priceLevel: 2, tags: ["Hielo", "Temporada"], placeId: "ChIJPatinaje1", lat: 22.1515, lng: -100.9755 },
+
+    // ========= CULTURA / MUSEOS (6) =========
+    { name: "Museo Laberinto de las Ciencias", category: "cultura", categoryLabel: "Cultura", emoji: "🔬", description: "Museo interactivo con experimentos, planetario y exposiciones temporales. Pa' aprender y divertirse.", address: "Parque Tangamanga I, Acceso 1", zone: "sur", rating: 4.7, priceLevel: 2, tags: ["Interactivo", "Ciencia"], placeId: "ChIJMuseoLaberinto1", lat: 22.1375, lng: -101.0100 },
+    { name: "Centro Cultural Caja Real", category: "cultura", categoryLabel: "Cultura", emoji: "🏛️", description: "Edificio colonial con exposiciones de arte, conciertos y eventos culturales. Entrada gratis varias veces al año.", address: "Av. Venustiano Carranza 150, Centro", zone: "centro", rating: 4.8, priceLevel: 1, tags: ["Arte", "Gratis"], placeId: "ChIJCajaReal1", lat: 22.1517, lng: -100.9780 },
+    { name: "Museo Federico Silva", category: "cultura", categoryLabel: "Cultura", emoji: "🗿", description: "Museo de escultura contemporánea. Colección importante y edificio hermoso. Entrada low cost.", address: "Álvaro Obregón 80, Centro", zone: "centro", rating: 4.6, priceLevel: 1, tags: ["Escultura", "Low cost"], placeId: "ChIJFedericoSilva1", lat: 22.1522, lng: -100.9772 },
+    { name: "Teatro de la Paz", category: "cultura", categoryLabel: "Cultura", emoji: "🎭", description: "Teatro histórico con conciertos, obras y ballet. Boletos accesibles para estudiantes.", address: "Av. Villerías 205, Centro", zone: "centro", rating: 4.9, priceLevel: 2, tags: ["Teatro", "Estudiante"], placeId: "ChIJTeatroPaz1", lat: 22.1524, lng: -100.9785 },
+    { name: "Cinepolis Citadella", category: "cultura", categoryLabel: "Cultura", emoji: "🎬", description: "Cine con salas IMAX y VIP. Martes económicos con boletos de $55. Palomeras enormes.", address: "Plaza Citadella, Av. Chapultepec", zone: "poniente", rating: 4.5, priceLevel: 2, tags: ["IMAX", "Martes $55"], placeId: "ChIJCinepolisCitadella1", lat: 22.1548, lng: -101.0008 },
+    { name: "Planetario Carl Sagan", category: "cultura", categoryLabel: "Cultura", emoji: "🪐", description: "Proyecciones astronómicas y documentales de ciencia. Experiencia inmersiva bajo la cúpula.", address: "Parque Tangamanga I, Sección Cultural", zone: "sur", rating: 4.7, priceLevel: 1, tags: ["Astronomía", "Inmersivo"], placeId: "ChIJPlanetario1", lat: 22.1370, lng: -101.0105 },
+
+    // ========= BRUNCH / DESAYUNOS (5) =========
+    { name: "La Oveja Negra Brunch", category: "brunch", categoryLabel: "Brunch", emoji: "🥐", description: "Brunch gourmet con opciones veganas y sin gluten. Hotcakes de avena, bowls y jugos frescos.", address: "Av. Chapultepec 950, Del Llano", zone: "poniente", rating: 4.8, priceLevel: 3, tags: ["Vegano", "Gourmet"], placeId: "ChIJOvejaNegra1", lat: 22.1538, lng: -101.0028 },
+    { name: "Huevo & Cía", category: "brunch", categoryLabel: "Brunch", emoji: "🍳", description: "Todo con huevo creativo: benedictinos, omelettes y shakshuka. Ambiente moderno, plan sábado perfecto.", address: "Av. Salvador Nava 2250, Tecnológico", zone: "poniente", rating: 4.7, priceLevel: 2, tags: ["Huevos", "Moderno"], placeId: "ChIJHuevoCia1", lat: 22.1470, lng: -101.0125 },
+    { name: "Potosino Desayunos", category: "brunch", categoryLabel: "Brunch", emoji: "🍳", description: "Desayunos tradicionales potosinos: enchiladas, gorditas, chilaquiles. Café de olla y jugo de zanahoria.", address: "Av. Muñoz 1450, Tequis", zone: "centro", rating: 4.6, priceLevel: 1, tags: ["Potosino", "Tradición"], placeId: "ChIJPotosinoDes1", lat: 22.1550, lng: -100.9850 },
+    { name: "Avocado & Co", category: "brunch", categoryLabel: "Brunch", emoji: "🥑", description: "Brunch healthy con tostas de aguacate, smoothie bowls y pan de masa madre casero.", address: "Plaza Citadella, Av. Chapultepec", zone: "poniente", rating: 4.6, priceLevel: 3, tags: ["Healthy", "Aguacate"], placeId: "ChIJAvocadoCo1", lat: 22.1547, lng: -101.0005 },
+    { name: "Mañanitas Café", category: "brunch", categoryLabel: "Brunch", emoji: "🥞", description: "Brunch mexicano con hot cakes rellenos, molletes y chocolates calientes. Porción abundante y barata.", address: "Av. Benito Juárez 820, Moderna", zone: "centro", rating: 4.5, priceLevel: 2, tags: ["Mexicano", "Abundante"], placeId: "ChIJMananitas1", lat: 22.1500, lng: -100.9870 },
+
+    // ========= ASIÁTICO / RAMEN / SUSHI (6) =========
+    { name: "Sushi Itto Centro", category: "asiatico", categoryLabel: "Asiático", emoji: "🍣", description: "Cadena de sushi con rollos creativos y promos 2x1 los miércoles. Ambiente casual.", address: "Av. Venustiano Carranza 1280, Polanco", zone: "poniente", rating: 4.4, priceLevel: 2, tags: ["Sushi", "Promos"], placeId: "ChIJSushiItto1", lat: 22.1503, lng: -100.9985 },
+    { name: "Ramen Ya SLP", category: "asiatico", categoryLabel: "Asiático", emoji: "🍜", description: "Ramen auténtico japonés con caldo tonkotsu. Pequeño local, vale la espera del sábado.", address: "Av. Salvador Nava 1420, Jardín", zone: "poniente", rating: 4.8, priceLevel: 2, tags: ["Japonés", "Auténtico"], placeId: "ChIJRamenYa1", lat: 22.1480, lng: -101.0065 },
+    { name: "Wok to Go", category: "asiatico", categoryLabel: "Asiático", emoji: "🥡", description: "Comida china rápida tipo wok. Armas tu plato con fideos, arroz y topping. Porciones jugosas.", address: "Plaza Sendero, Prol. Muñoz", zone: "poniente", rating: 4.3, priceLevel: 1, tags: ["Chino", "Rápido"], placeId: "ChIJWokToGo1", lat: 22.1733, lng: -101.0152 },
+    { name: "Kioto Roll Bar", category: "asiatico", categoryLabel: "Asiático", emoji: "🍱", description: "Sushi gourmet con rollos de temporada y ambiente elegante. Hay combos para compartir entre 2-4 personas.", address: "Av. Chapultepec 720, Del Llano", zone: "poniente", rating: 4.7, priceLevel: 3, tags: ["Sushi", "Elegante"], placeId: "ChIJKiotoRoll1", lat: 22.1542, lng: -101.0018 },
+    { name: "Asia Kitchen", category: "asiatico", categoryLabel: "Asiático", emoji: "🥢", description: "Comida asiática variada: tailandés, chino, japonés. Buffet los domingos. Ideal si no se ponen de acuerdo.", address: "Av. Himno Nacional 1750, Tangamanga", zone: "sur", rating: 4.4, priceLevel: 2, tags: ["Buffet", "Variado"], placeId: "ChIJAsiaKitchen1", lat: 22.1415, lng: -100.9935 },
+    { name: "Poke Bowl SLP", category: "asiatico", categoryLabel: "Asiático", emoji: "🍲", description: "Poke bowls hawaianos frescos armas a tu gusto. Opciones veganas con tofu y tempeh.", address: "Av. Dr. Manuel Nava 310, Universitaria", zone: "poniente", rating: 4.6, priceLevel: 2, tags: ["Poke", "Vegano"], placeId: "ChIJPokeBowl1", lat: 22.1448, lng: -100.9795 },
+  ];
+
+  const CATEGORIES = [
+    { id: 'pizza', label: 'Pizza', emoji: '🍕' },
+    { id: 'cafe', label: 'Café', emoji: '☕' },
+    { id: 'billar', label: 'Billar', emoji: '🎱' },
+    { id: 'postres', label: 'Postres', emoji: '🍦' },
+    { id: 'boba', label: 'Boba', emoji: '🧋' },
+    { id: 'burger', label: 'Burger', emoji: '🍔' },
+    { id: 'arcade', label: 'Arcade', emoji: '🎮' },
+    { id: 'crepas', label: 'Crepas', emoji: '🥞' },
+    { id: 'tacos', label: 'Tacos', emoji: '🌮' },
+    { id: 'parque', label: 'Parques', emoji: '🌳' },
+    { id: 'deporte', label: 'Deportes', emoji: '🎳' },
+    { id: 'cultura', label: 'Cultura', emoji: '🎭' },
+    { id: 'brunch', label: 'Brunch', emoji: '🥐' },
+    { id: 'asiatico', label: 'Asiático', emoji: '🍜' },
+  ];
+
+  const ZONES = [
+    { id: 'centro', label: 'Centro', emoji: '🏛️' },
+    { id: 'poniente', label: 'Poniente', emoji: '🌅' },
+    { id: 'sur', label: 'Sur', emoji: '⬇️' },
+    { id: 'norte', label: 'Norte', emoji: '⬆️' },
+    { id: 'soledad', label: 'Soledad', emoji: '🏘️' },
+  ];
+
+  const PRICES = [
+    { id: 1, label: 'Económico', emoji: '💸' },
+    { id: 2, label: 'Medio', emoji: '💵' },
+    { id: 3, label: 'Premium', emoji: '💎' },
+  ];
+
+  const RATINGS = [
+    { id: 4.5, label: '4.5+ ⭐' },
+    { id: 4.0, label: '4.0+ ⭐' },
+  ];
+
+  // ============ STATE ============
+  let selectedCategories = new Set();
+  let selectedZones = new Set();
+  let selectedPrices = new Set();
+  let selectedMinRating = null;
+  let userProfile = null;
+  let choosingPlace = null;
+  let history = [];
+  let mapInstance = null;
+  let placeMarkers = [];
+  let chatHistory = [];
+
+  // ============ STORAGE ============
+  async function loadData() {
+    try {
+      if (window.storage) {
+        const profileRes = await window.storage.get('profile');
+        if (profileRes && profileRes.value) userProfile = JSON.parse(profileRes.value);
+      } else {
+        const p = localStorage.getItem('convive_profile');
+        if (p) userProfile = JSON.parse(p);
+      }
+    } catch(e) {}
+    try {
+      if (window.storage) {
+        const historyRes = await window.storage.get('history');
+        if (historyRes && historyRes.value) history = JSON.parse(historyRes.value);
+      } else {
+        const h = localStorage.getItem('convive_history');
+        if (h) history = JSON.parse(h);
+      }
+    } catch(e) { history = []; }
+    updateProfileBtn();
+  }
+
+  async function saveData(key, value) {
+    try {
+      if (window.storage) {
+        await window.storage.set(key, JSON.stringify(value));
+      } else {
+        localStorage.setItem('convive_' + key, JSON.stringify(value));
+      }
+    } catch(e) {
+      try { localStorage.setItem('convive_' + key, JSON.stringify(value)); } catch(err) {}
+    }
+  }
+
+  // ============ INIT ============
+  function init() {
+    document.getElementById('totalPlaces').textContent = PLACES.length + '+';
+    document.getElementById('totalCategories').textContent = CATEGORIES.length;
+    initMap();
+    renderFilters();
+    renderPlaces();
+    loadData();
+    initChat();
+  }
+
+  // ============ MAP ============
+  function initMap() {
+    const map = L.map('map', {
+      minZoom: 11,
+      maxBounds: [[21.85, -101.35], [22.50, -100.65]],
+      maxBoundsViscosity: 0.85
+    }).setView([22.1516, -100.9855], 12);
+    mapInstance = map;
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap',
+      maxZoom: 19
+    }).addTo(map);
+
+    renderMapMarkers();
+  }
+
+  function makeMarkerIcon(emoji, color, size) {
+    const s = size || 38;
+    return L.divIcon({
+      html: `<div style="background:${color};width:${s}px;height:${s}px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(11,30,63,.3);border:2.5px solid white"><span style="transform:rotate(45deg);font-size:${Math.round(s*0.5)}px">${emoji}</span></div>`,
+      className: '',
+      iconSize: [s, s],
+      iconAnchor: [s/2, s],
+      popupAnchor: [0, -s+2]
+    });
+  }
+
+  function renderMapMarkers() {
+    if (!mapInstance) return;
+    // Clear
+    placeMarkers.forEach(m => mapInstance.removeLayer(m));
+    placeMarkers = [];
+
+    const filtered = getFilteredPlaces();
+    const colors = {
+      pizza: '#2563EB', cafe: '#1D4ED8', billar: '#3B82F6', postres: '#1E40AF',
+      boba: '#2563EB', burger: '#1D4ED8', arcade: '#3B82F6', crepas: '#1E40AF',
+      tacos: '#2563EB', parque: '#1D4ED8', deporte: '#3B82F6', cultura: '#1E40AF',
+      brunch: '#2563EB', asiatico: '#1D4ED8'
+    };
+
+    filtered.forEach(p => {
+      const color = colors[p.category] || '#2563EB';
+      const icon = makeMarkerIcon(p.emoji, color);
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}&query_place_id=${p.placeId}`;
+      const marker = L.marker([p.lat, p.lng], { icon: icon })
+        .bindPopup(`
+          <div class="map-popup">
+            <div class="cat">${p.emoji} ${p.categoryLabel}</div>
+            <h4>${p.name}</h4>
+            <div class="addr">📍 ${p.address}</div>
+            <a href="${mapsUrl}" target="_blank" rel="noopener">Ver en Google Maps →</a>
+          </div>
+        `);
+      marker.addTo(mapInstance);
+      placeMarkers.push(marker);
+    });
+
+    // Update map counter
+    document.getElementById('mapCounter').textContent = `${filtered.length} lugar${filtered.length !== 1 ? 'es' : ''}`;
+  }
+
+  // ============ FILTERS ============
+  function renderFilters() {
+    // Categorías
+    const catContainer = document.getElementById('categoryFilters');
+    catContainer.innerHTML = CATEGORIES.map(cat => {
+      const count = PLACES.filter(p => p.category === cat.id).length;
+      const checked = selectedCategories.has(cat.id);
+      return `
+        <label class="check-pill ${checked ? 'checked' : ''}" onclick="toggleCategory('${cat.id}')">
+          <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span>${cat.emoji} ${cat.label}</span>
+          <span class="pill-count">${count}</span>
+        </label>
+      `;
+    }).join('');
+
+    // Zonas
+    const zoneContainer = document.getElementById('zoneFilters');
+    zoneContainer.innerHTML = ZONES.map(z => {
+      const count = PLACES.filter(p => p.zone === z.id).length;
+      const checked = selectedZones.has(z.id);
+      return `
+        <label class="check-pill ${checked ? 'checked' : ''}" onclick="toggleZone('${z.id}')">
+          <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span>${z.emoji} ${z.label}</span>
+          <span class="pill-count">${count}</span>
+        </label>
+      `;
+    }).join('');
+
+    // Precios
+    const priceContainer = document.getElementById('priceFilters');
+    priceContainer.innerHTML = PRICES.map(pr => {
+      const count = PLACES.filter(p => p.priceLevel === pr.id).length;
+      const checked = selectedPrices.has(pr.id);
+      return `
+        <label class="check-pill ${checked ? 'checked' : ''}" onclick="togglePrice(${pr.id})">
+          <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span>${pr.emoji} ${pr.label} ${'$'.repeat(pr.id)}</span>
+          <span class="pill-count">${count}</span>
+        </label>
+      `;
+    }).join('');
+
+    // Ratings
+    const ratingContainer = document.getElementById('ratingFilters');
+    ratingContainer.innerHTML = RATINGS.map(r => {
+      const count = PLACES.filter(p => p.rating >= r.id).length;
+      const checked = selectedMinRating === r.id;
+      return `
+        <label class="check-pill ${checked ? 'checked' : ''}" onclick="toggleRating(${r.id})">
+          <span class="check-box"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+          <span>${r.label}</span>
+          <span class="pill-count">${count}</span>
+        </label>
+      `;
+    }).join('');
+  }
+
+  function toggleCategory(id) {
+    if (selectedCategories.has(id)) selectedCategories.delete(id);
+    else selectedCategories.add(id);
+    applyFilters();
+  }
+
+  function toggleZone(id) {
+    if (selectedZones.has(id)) selectedZones.delete(id);
+    else selectedZones.add(id);
+    applyFilters();
+  }
+
+  function togglePrice(id) {
+    if (selectedPrices.has(id)) selectedPrices.delete(id);
+    else selectedPrices.add(id);
+    applyFilters();
+  }
+
+  function toggleRating(id) {
+    selectedMinRating = (selectedMinRating === id) ? null : id;
+    applyFilters();
+  }
+
+  function clearFilters() {
+    selectedCategories.clear();
+    selectedZones.clear();
+    selectedPrices.clear();
+    selectedMinRating = null;
+    applyFilters();
+  }
+
+  function applyFilters() {
+    renderFilters();
+    renderPlaces();
+    renderMapMarkers();
+  }
+
+  function getFilteredPlaces() {
+    return PLACES.filter(p => {
+      if (selectedCategories.size > 0 && !selectedCategories.has(p.category)) return false;
+      if (selectedZones.size > 0 && !selectedZones.has(p.zone)) return false;
+      if (selectedPrices.size > 0 && !selectedPrices.has(p.priceLevel)) return false;
+      if (selectedMinRating !== null && p.rating < selectedMinRating) return false;
+      return true;
+    });
+  }
+
+  function renderPlaces() {
+    const container = document.getElementById('placesGrid');
+    const filtered = getFilteredPlaces();
+    document.getElementById('resultsCount').textContent = `${filtered.length} lugar${filtered.length !== 1 ? 'es' : ''}`;
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="no-results">No hay lugares que coincidan con tus filtros. Quita algunos pa\' ver más opciones.</div>';
+      return;
+    }
+
+    container.innerHTML = filtered.map((p, idx) => {
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}&query_place_id=${p.placeId}`;
+      const priceStr = '$'.repeat(p.priceLevel || 1);
+      const zoneName = (ZONES.find(z => z.id === p.zone) || {}).label || '';
+      return `
+        <div class="place-card" style="animation-delay: ${Math.min(idx, 20) * 0.03}s">
+          <div class="place-card-header">
+            <span class="category-badge">${p.emoji} ${p.categoryLabel}</span>
+            <span class="rating-badge"><span class="star">★</span> ${p.rating}</span>
+          </div>
+          <div class="place-card-body">
+            <h3 class="place-name">${p.name}</h3>
+            <p class="place-description">${p.description}</p>
+            <div class="place-tags">
+              <span class="place-tag price">${priceStr}</span>
+              <span class="place-tag zone">📍 ${zoneName}</span>
+              ${p.tags.map(t => `<span class="place-tag">${t}</span>`).join('')}
+            </div>
+            <div class="place-address">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>${p.address}</span>
+            </div>
+            <div class="place-actions">
+              <a href="${mapsUrl}" target="_blank" rel="noopener" class="btn-maps">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                Google Maps
+              </a>
+              <button class="btn-choose" onclick='choosePlace(${JSON.stringify(p).replace(/'/g, "&apos;")})'>
+                Avisar que voy
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ============ CHATBOT ============
+  function initChat() {
+    // Mensaje de bienvenida
+    addChatBubble('¡Hola! 👋 Soy Convi, tu asistente. Dime qué plan traes y te recomiendo lugares sin alcohol de SLP. Puedes preguntarme cosas como:', 'bot');
+  }
+
+  function toggleChat() {
+    const win = document.getElementById('chatWindow');
+    win.classList.toggle('active');
+    if (win.classList.contains('active')) {
+      setTimeout(() => document.getElementById('chatInput').focus(), 250);
+    }
+  }
+
+  function addChatBubble(text, type) {
+    const body = document.getElementById('chatBody');
+    const bubble = document.createElement('div');
+    bubble.className = `chat-bubble ${type}`;
+    bubble.textContent = text;
+    body.appendChild(bubble);
+    body.scrollTop = body.scrollHeight;
+    return bubble;
+  }
+
+  function addTypingBubble() {
+    const body = document.getElementById('chatBody');
+    const bubble = document.createElement('div');
+    bubble.className = 'chat-bubble bot typing';
+    bubble.innerHTML = '<span></span><span></span><span></span>';
+    body.appendChild(bubble);
+    body.scrollTop = body.scrollHeight;
+    return bubble;
+  }
+
+  function sendSuggestion(text) {
+    document.getElementById('chatInput').value = text;
+    sendChatMessage();
+  }
+
+  async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    // Esconder sugerencias después del primer mensaje
+    document.getElementById('chatSuggestions').style.display = 'none';
+
+    addChatBubble(text, 'user');
+    chatHistory.push({ role: 'user', content: text });
+    input.value = '';
+
+    const sendBtn = document.getElementById('chatSendBtn');
+    sendBtn.disabled = true;
+
+    const typingBubble = addTypingBubble();
+
+    try {
+      // Construir contexto con los lugares disponibles (versión compacta)
+      const placesContext = PLACES.map(p => ({
+        nombre: p.name,
+        categoria: p.categoryLabel,
+        descripcion: p.description,
+        zona: p.zone,
+        precio: '$'.repeat(p.priceLevel),
+        rating: p.rating,
+        direccion: p.address,
+        tags: p.tags
+      }));
+
+      const systemPrompt = `Eres Convi, un asistente amigable para jóvenes de San Luis Potosí (SLP) que ayuda a encontrar planes SIN ALCOHOL. Hablas con tono juvenil, casual y mexicano (puedes usar "chido", "banda", "cuates", "pa'"). Eres breve (máximo 3-4 oraciones por respuesta). 
+
+IMPORTANTE: Solo recomiendas lugares de esta lista verificada. Cuando recomiendes, menciona el nombre EXACTO del lugar, la zona, y una razón corta de por qué. Máximo recomienda 3 lugares a la vez.
+
+Si el usuario pregunta algo fuera de tema (alcohol, cosas riesgosas), redirígelo amablemente al objetivo: planes sanos en SLP.
+
+LUGARES DISPONIBLES (${placesContext.length} opciones):
+${JSON.stringify(placesContext)}`;
+
+      const response = await fetch('/.netlify/functions/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            { role: 'system', content: systemPrompt },
+            ...chatHistory
+          ]
+        })
+      });
+
+      typingBubble.remove();
+
+      if (!response.ok) {
+        throw new Error('Error de red');
+      }
+
+      const data = await response.json();
+      const botText = data.reply || data.message || data.content || 'No pude responder, intenta de nuevo 🙏';
+
+      addChatBubble(botText, 'bot');
+      chatHistory.push({ role: 'assistant', content: botText });
+
+      // Mantener historial manejable
+      if (chatHistory.length > 20) {
+        chatHistory = chatHistory.slice(-20);
+      }
+    } catch (err) {
+      typingBubble.remove();
+      console.error('Chat error:', err);
+      addChatBubble('Uy, tuve un problemita conectándome 😅. Mientras tanto, puedes usar los filtros arriba pa\' encontrar lugares. ¡Intenta de nuevo en un ratito!', 'bot');
+    } finally {
+      sendBtn.disabled = false;
+      input.focus();
+    }
+  }
+
+  // ============ PROFILE ============
+  function openProfileModal() {
+    if (userProfile) {
+      document.getElementById('userName').value = userProfile.userName || '';
+      document.getElementById('userAge').value = userProfile.userAge || '';
+      document.getElementById('userPhone').value = userProfile.userPhone || '';
+      document.getElementById('parent1Name').value = userProfile.parent1Name || '';
+      document.getElementById('parent1Phone').value = userProfile.parent1Phone || '';
+      document.getElementById('parent2Name').value = userProfile.parent2Name || '';
+      document.getElementById('parent2Phone').value = userProfile.parent2Phone || '';
+      renderHistory();
+    }
+    openModal('profileModal');
+  }
+
+  function validatePhone(p) {
+    const clean = p.replace(/\s|-/g, '');
+    return /^\d{10}$/.test(clean);
+  }
+
+  function saveProfile() {
+    document.querySelectorAll('.form-error').forEach(e => e.classList.remove('visible'));
+    document.querySelectorAll('.form-input').forEach(i => i.classList.remove('error'));
+
+    const data = {
+      userName: document.getElementById('userName').value.trim(),
+      userAge: parseInt(document.getElementById('userAge').value),
+      userPhone: document.getElementById('userPhone').value.trim(),
+      parent1Name: document.getElementById('parent1Name').value.trim(),
+      parent1Phone: document.getElementById('parent1Phone').value.trim(),
+      parent2Name: document.getElementById('parent2Name').value.trim(),
+      parent2Phone: document.getElementById('parent2Phone').value.trim(),
+    };
+
+    let valid = true;
+    if (!data.userName) { showErr('userName'); valid = false; }
+    if (!data.userAge || data.userAge < 12 || data.userAge > 17) { showErr('userAge'); valid = false; }
+    if (!validatePhone(data.userPhone)) { showErr('userPhone'); valid = false; }
+    if (!data.parent1Name) { showErr('parent1Name'); valid = false; }
+    if (!validatePhone(data.parent1Phone)) { showErr('parent1Phone'); valid = false; }
+    if (data.parent2Phone && !validatePhone(data.parent2Phone)) { showErr('parent2Phone'); valid = false; }
+    if (!valid) return;
+
+    userProfile = data;
+    saveData('profile', userProfile);
+    updateProfileBtn();
+    closeModal('profileModal');
+  }
+
+  function showErr(id) {
+    document.getElementById('err-' + id).classList.add('visible');
+    document.getElementById(id).classList.add('error');
+  }
+
+  function updateProfileBtn() {
+    const btn = document.getElementById('profileBtnText');
+    if (userProfile) {
+      btn.textContent = `👋 ${userProfile.userName}`;
+    } else {
+      btn.textContent = 'Crear perfil';
+    }
+  }
+
+  // ============ CHOOSE PLACE ============
+  function choosePlace(place) {
+    if (!userProfile) {
+      alert('Primero crea tu perfil para avisar a tus tutores 🙏');
+      openProfileModal();
+      return;
+    }
+    choosingPlace = place;
+    renderChooseModal();
+    openModal('chooseModal');
+  }
+
+  function renderChooseModal() {
+    const p = choosingPlace;
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}&query_place_id=${p.placeId}`;
+    const now = new Date();
+    const timeStr = now.toLocaleString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+
+    const parents = [];
+    if (userProfile.parent1Name && userProfile.parent1Phone) {
+      parents.push({ name: userProfile.parent1Name, phone: userProfile.parent1Phone });
+    }
+    if (userProfile.parent2Name && userProfile.parent2Phone) {
+      parents.push({ name: userProfile.parent2Name, phone: userProfile.parent2Phone });
+    }
+
+    const container = document.getElementById('chooseContent');
+    container.innerHTML = `
+      <p style="font-size:0.95rem; color: var(--plum-soft); margin-bottom: 16px;">Se enviará a:</p>
+      <div class="parent-list">
+        ${parents.map(pa => `<div class="parent-item"><strong>${pa.name}</strong><span>${pa.phone}</span></div>`).join('')}
+      </div>
+      <div class="notification-preview">
+        <p>
+          Hola ${parents[0].name.split(' ')[0]}, soy <strong>${userProfile.userName}</strong>. Voy a estar en <strong>${p.name}</strong> ${p.emoji} (${p.categoryLabel}).<br><br>
+          📍 ${p.address}<br>
+          🗺️ <span class="maps-link">${mapsUrl}</span><br>
+          ⏰ ${timeStr}<br><br>
+          Te aviso por SOBR. Cualquier cosa me marcas al ${userProfile.userPhone}.
+        </p>
+      </div>
+    `;
+  }
+
+  function confirmChoose() {
+    const p = choosingPlace;
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}&query_place_id=${p.placeId}`;
+    history.unshift({
+      placeName: p.name,
+      placeEmoji: p.emoji,
+      category: p.categoryLabel,
+      address: p.address,
+      mapsUrl: mapsUrl,
+      timestamp: Date.now(),
+    });
+    if (history.length > 20) history = history.slice(0, 20);
+    saveData('history', history);
+
+    closeModal('chooseModal');
+    setTimeout(() => openModal('successModal'), 200);
+  }
+
+  function renderHistory() {
+    const section = document.getElementById('historySection');
+    const list = document.getElementById('historyList');
+
+    if (history.length === 0) {
+      section.style.display = 'block';
+      list.innerHTML = '<div class="history-empty">Aún no has avisado a tus tutores de ningún lugar.</div>';
+      return;
+    }
+
+    section.style.display = 'block';
+    list.innerHTML = history.slice(0, 10).map(h => {
+      const date = new Date(h.timestamp);
+      const dateStr = date.toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="history-item">
+          <div class="history-item-info">
+            <h4>${h.placeEmoji} ${h.placeName}</h4>
+            <p>${h.category} · ${dateStr}</p>
+          </div>
+          <a href="${h.mapsUrl}" target="_blank" rel="noopener" class="btn-maps" style="padding: 6px 12px; font-size: 0.75rem;">Maps</a>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ============ MODAL HELPERS ============
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+      document.body.style.overflow = '';
+    }
+  });
+
+  // Run init when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+</script>
+</body>
+</html>
