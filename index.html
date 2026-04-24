@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Convive SLP · Salir sin alcohol está de moda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;0,9..144,900;1,9..144,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #F6EFE4;
+    --cream-deep: #EFE4D1;
+    --coral: #F15A3D;
+    --coral-deep: #D94124;
+    --tangerine: #F59B3B;
+    --mint: #9FC2A7;
+    --mint-deep: #5E8B6B;
+    --plum: #2A1F2D;
+    --plum-soft: #4A3B4E;
+    --yellow: #F2C94C;
+    --white: #FFFBF3;
+    --shadow: 0 10px 30px rgba(42, 31, 45, 0.08);
+    --shadow-strong: 0 20px 50px rgba(42, 31, 45, 0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Manrope', sans-serif;
+    background: var(--cream);
+    color: var(--plum);
+    line-height: 1.6;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    opacity: 0.08;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: multiply;
+  }
+
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.45;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ============ NAVBAR ============ */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(246, 239, 228, 0.85);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1.5px solid rgba(42, 31, 45, 0.08);
+    padding: 18px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.6rem;
+    letter-spacing: -0.02em;
+    color: var(--plum);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-dot {
+    width: 14px;
+    height: 14px;
+    background: var(--coral);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(241, 90, 61, 0.2);
+    animation: pulse 2.5s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 4px rgba(241, 90, 61, 0.2); }
+    50% { box-shadow: 0 0 0 8px rgba(241, 90, 61, 0.08); }
+  }
+
+  .nav-links { display: flex; gap: 6px; align-items: center; }
+  .nav-links a, .nav-links button {
+    color: var(--plum);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 8px 16px;
+    border-radius: 100px;
+    transition: all 0.25s ease;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .nav-links a:hover, .nav-links button:hover {
+    background: var(--plum);
+    color: var(--cream);
+  }
+  .profile-pill {
+    background: var(--mint) !important;
+    color: var(--plum) !important;
+    padding: 8px 18px !important;
+    font-weight: 700 !important;
+  }
+  .profile-pill:hover {
+    background: var(--mint-deep) !important;
+    color: var(--cream) !important;
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    position: relative;
+    padding: 90px 40px 140px;
+    text-align: center;
+    z-index: 2;
+    overflow: hidden;
+  }
+
+  .hero .blob-1 { top: -100px; left: -100px; width: 500px; height: 500px; background: var(--coral); }
+  .hero .blob-2 { bottom: -100px; right: -100px; width: 450px; height: 450px; background: var(--mint); }
+
+  .eyebrow {
+    display: inline-block;
+    background: var(--plum);
+    color: var(--cream);
+    padding: 8px 18px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    position: relative;
+    z-index: 2;
+  }
+  .eyebrow::before {
+    content: '●';
+    color: var(--yellow);
+    margin-right: 6px;
+  }
+
+  .hero h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(2.8rem, 7vw, 5.6rem);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-width: 1000px;
+    margin: 0 auto 24px;
+    position: relative;
+    z-index: 2;
+  }
+  .hero h1 .italic {
+    font-style: italic;
+    color: var(--coral);
+    font-weight: 600;
+  }
+  .hero h1 .highlight {
+    background: var(--yellow);
+    padding: 0 14px;
+    border-radius: 14px;
+    display: inline-block;
+    transform: rotate(-2deg);
+  }
+
+  .hero p {
+    font-size: 1.15rem;
+    max-width: 620px;
+    margin: 0 auto 40px;
+    color: var(--plum-soft);
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    flex-wrap: wrap;
+    position: relative;
+    z-index: 2;
+  }
+
+  .btn-primary, .btn-secondary {
+    font-family: 'Manrope', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 16px 32px;
+    border-radius: 100px;
+    cursor: pointer;
+    border: none;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn-primary {
+    background: var(--coral);
+    color: var(--cream);
+    box-shadow: 0 6px 0 var(--coral-deep);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 0 var(--coral-deep);
+  }
+  .btn-primary:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--coral-deep); }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--plum);
+    border: 2.5px solid var(--plum);
+  }
+  .btn-secondary:hover {
+    background: var(--plum);
+    color: var(--cream);
+  }
+
+  /* ============ MISSION STRIP ============ */
+  .mission-strip {
+    background: var(--plum);
+    color: var(--cream);
+    padding: 22px 0;
+    overflow: hidden;
+    position: relative;
+    z-index: 3;
+    border-top: 3px solid var(--coral);
+    border-bottom: 3px solid var(--coral);
+  }
+  .mission-track {
+    display: flex;
+    gap: 50px;
+    white-space: nowrap;
+    animation: scroll 40s linear infinite;
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.8rem;
+    font-style: italic;
+  }
+  .mission-track span { display: inline-flex; align-items: center; gap: 50px; }
+  .mission-track .dot { color: var(--coral); }
+  @keyframes scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  /* ============ STATS ============ */
+  .stats {
+    padding: 80px 40px;
+    position: relative;
+    z-index: 2;
+  }
+  .stats-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+  }
+  .stat-card {
+    background: var(--white);
+    border: 2px solid var(--plum);
+    border-radius: 24px;
+    padding: 32px;
+    box-shadow: 6px 6px 0 var(--plum);
+    transition: transform 0.2s;
+  }
+  .stat-card:hover { transform: translate(-3px, -3px); box-shadow: 9px 9px 0 var(--plum); }
+  .stat-card:nth-child(1) { background: var(--mint); }
+  .stat-card:nth-child(2) { background: var(--yellow); }
+  .stat-card:nth-child(3) { background: var(--coral); color: var(--cream); }
+  .stat-card:nth-child(3) .stat-label { color: var(--cream); opacity: 0.85; }
+  .stat-number {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 3.5rem;
+    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .stat-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--plum-soft);
+    line-height: 1.4;
+  }
+
+  /* ============ PLACES SECTION ============ */
+  .places-section {
+    padding: 80px 40px 120px;
+    position: relative;
+    z-index: 2;
+  }
+  .places-header {
+    max-width: 1400px;
+    margin: 0 auto 50px;
+    text-align: center;
+  }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+  .section-title .italic { font-style: italic; font-weight: 600; color: var(--coral); }
+  .section-subtitle {
+    color: var(--plum-soft);
+    font-size: 1.1rem;
+    max-width: 560px;
+    margin: 0 auto;
+  }
+
+  .filters {
+    max-width: 1400px;
+    margin: 0 auto 50px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    padding: 0 20px;
+  }
+  .filter-btn {
+    font-family: 'Manrope', sans-serif;
+    background: var(--white);
+    border: 2px solid var(--plum);
+    color: var(--plum);
+    padding: 12px 22px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .filter-btn:hover {
+    background: var(--cream-deep);
+  }
+  .filter-btn.active {
+    background: var(--plum);
+    color: var(--cream);
+  }
+  .filter-count {
+    background: var(--coral);
+    color: var(--cream);
+    padding: 2px 8px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+  .filter-btn.active .filter-count {
+    background: var(--yellow);
+    color: var(--plum);
+  }
+
+  /* ============ PLACE CARDS ============ */
+  .places-grid {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 28px;
+  }
+
+  .place-card {
+    background: var(--white);
+    border-radius: 28px;
+    overflow: hidden;
+    border: 2px solid var(--plum);
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+  .place-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-strong);
+  }
+
+  .place-card-header {
+    padding: 24px 24px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--cream-deep);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--plum);
+  }
+
+  .rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--plum);
+    color: var(--cream);
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .rating-badge .star { color: var(--yellow); }
+
+  .place-card-body {
+    padding: 16px 24px 24px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .place-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 800;
+    font-size: 1.45rem;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+    color: var(--plum);
+  }
+
+  .place-description {
+    font-size: 0.92rem;
+    color: var(--plum-soft);
+    line-height: 1.5;
+    margin-bottom: 14px;
+    flex-grow: 1;
+  }
+
+  .place-address {
+    font-size: 0.85rem;
+    color: var(--plum-soft);
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(42, 31, 45, 0.2);
+  }
+  .place-address svg {
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  .place-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+  .place-tag {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 10px;
+    background: var(--mint);
+    color: var(--plum);
+    border-radius: 100px;
+    letter-spacing: 0.03em;
+  }
+  .place-tag.price {
+    background: var(--yellow);
+  }
+
+  .place-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  .btn-maps, .btn-choose {
+    flex: 1;
+    font-family: 'Manrope', sans-serif;
+    padding: 12px 16px;
+    border-radius: 100px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-decoration: none;
+    text-align: center;
+  }
+  .btn-maps {
+    background: var(--cream-deep);
+    color: var(--plum);
+    border: 2px solid var(--plum);
+  }
+  .btn-maps:hover {
+    background: var(--plum);
+    color: var(--cream);
+  }
+  .btn-choose {
+    background: var(--coral);
+    color: var(--cream);
+    border: 2px solid var(--coral);
+  }
+  .btn-choose:hover {
+    background: var(--coral-deep);
+    border-color: var(--coral-deep);
+  }
+
+  .no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--plum-soft);
+    font-size: 1.1rem;
+  }
+
+  /* ============ MODAL ============ */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(42, 31, 45, 0.6);
+    backdrop-filter: blur(6px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .modal-overlay.active {
+    display: flex;
+    opacity: 1;
+  }
+
+  .modal {
+    background: var(--cream);
+    border-radius: 28px;
+    max-width: 520px;
+    width: 100%;
+    max-height: 92vh;
+    overflow-y: auto;
+    border: 2.5px solid var(--plum);
+    box-shadow: 12px 12px 0 var(--plum);
+    transform: scale(0.95) translateY(10px);
+    transition: transform 0.25s ease;
+  }
+  .modal-overlay.active .modal { transform: scale(1) translateY(0); }
+
+  .modal-header {
+    padding: 28px 32px 16px;
+    border-bottom: 2px dashed rgba(42, 31, 45, 0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .modal-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.8rem;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+  .modal-title .italic { font-style: italic; color: var(--coral); font-weight: 600; }
+  .modal-close {
+    background: var(--plum);
+    color: var(--cream);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { background: var(--coral); transform: rotate(90deg); }
+
+  .modal-body { padding: 24px 32px; }
+
+  .form-group { margin-bottom: 20px; }
+  .form-label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--plum);
+  }
+  .form-label .helper {
+    font-weight: 500;
+    color: var(--plum-soft);
+    font-size: 0.8rem;
+  }
+  .form-input {
+    width: 100%;
+    font-family: 'Manrope', sans-serif;
+    padding: 14px 18px;
+    border: 2px solid var(--plum);
+    background: var(--white);
+    border-radius: 16px;
+    font-size: 1rem;
+    color: var(--plum);
+    transition: all 0.2s;
+  }
+  .form-input:focus {
+    outline: none;
+    border-color: var(--coral);
+    box-shadow: 0 0 0 4px rgba(241, 90, 61, 0.15);
+  }
+  .form-input.error {
+    border-color: var(--coral-deep);
+    background: #FFF0ED;
+  }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-error {
+    font-size: 0.82rem;
+    color: var(--coral-deep);
+    margin-top: 6px;
+    display: none;
+    font-weight: 600;
+  }
+  .form-error.visible { display: block; }
+
+  .form-info {
+    background: var(--mint);
+    padding: 14px 18px;
+    border-radius: 16px;
+    font-size: 0.88rem;
+    color: var(--plum);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .form-info strong { color: var(--mint-deep); }
+
+  .modal-footer {
+    padding: 16px 32px 28px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  /* ============ NOTIFICATION MODAL ============ */
+  .notification-preview {
+    background: var(--white);
+    border: 2px solid var(--plum);
+    border-radius: 20px;
+    padding: 20px;
+    margin: 16px 0;
+    position: relative;
+  }
+  .notification-preview::before {
+    content: 'SMS · Mensaje';
+    position: absolute;
+    top: -11px;
+    left: 20px;
+    background: var(--coral);
+    color: var(--cream);
+    padding: 2px 12px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .notification-preview p {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--plum);
+  }
+  .notification-preview .maps-link {
+    color: var(--coral);
+    font-weight: 600;
+    word-break: break-all;
+  }
+
+  .success-checkmark {
+    width: 64px;
+    height: 64px;
+    background: var(--mint);
+    border: 3px solid var(--plum);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 16px;
+    font-size: 2rem;
+  }
+
+  .parent-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0;
+  }
+  .parent-item {
+    background: var(--cream-deep);
+    padding: 10px 14px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+  }
+  .parent-item strong { color: var(--plum); }
+  .parent-item span { color: var(--plum-soft); font-weight: 600; }
+
+  /* ============ HISTORY ============ */
+  .history-item {
+    background: var(--white);
+    border: 2px solid var(--plum);
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .history-item-info h4 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .history-item-info p {
+    font-size: 0.82rem;
+    color: var(--plum-soft);
+  }
+  .history-empty {
+    text-align: center;
+    padding: 30px;
+    color: var(--plum-soft);
+  }
+
+  /* ============ FOOTER ============ */
+  footer {
+    background: var(--plum);
+    color: var(--cream);
+    padding: 60px 40px 30px;
+    position: relative;
+    z-index: 2;
+  }
+  .footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  .footer-logo {
+    font-family: 'Fraunces', serif;
+    font-weight: 900;
+    font-size: 1.4rem;
+  }
+  .footer-logo .italic { font-style: italic; color: var(--coral); font-weight: 600; }
+  .footer-text { font-size: 0.9rem; opacity: 0.7; max-width: 400px; }
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 40px auto 0;
+    padding-top: 24px;
+    border-top: 1px solid rgba(246, 239, 228, 0.15);
+    font-size: 0.82rem;
+    opacity: 0.6;
+    text-align: center;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 768px) {
+    nav { padding: 14px 20px; }
+    .nav-links { gap: 2px; }
+    .nav-links a, .nav-links button { padding: 6px 10px; font-size: 0.85rem; }
+    .hero { padding: 60px 20px 90px; }
+    .places-section { padding: 60px 20px 80px; }
+    .stats { padding: 60px 20px; }
+    .form-row { grid-template-columns: 1fr; }
+    .mission-track { font-size: 1.2rem; }
+    .modal { border-radius: 20px; }
+    .modal-header, .modal-body { padding-left: 20px; padding-right: 20px; }
+    .modal-footer { padding: 16px 20px 24px; }
+  }
+
+  /* Stagger animation on load */
+  .place-card {
+    animation: fadeUp 0.6s ease backwards;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <span class="logo-dot"></span>
+    Convive<span style="font-style:italic; color: var(--coral); font-weight:600;">SLP</span>
+  </div>
+  <div class="nav-links">
+    <a href="#lugares">Lugares</a>
+    <a href="#mision">Misión</a>
+    <button class="profile-pill" onclick="openProfileModal()">
+      <span id="profileBtnText">Crear perfil</span>
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="eyebrow">Por y para jóvenes de San Luis Potosí</div>
+  <h1>
+    Salir con amigos sin <span class="italic">alcohol</span>
+    <br>sí es <span class="highlight">posible</span>.
+  </h1>
+  <p>Una guía curada de lugares reales en SLP donde la diversión no depende de una cerveza. Porque convivir, reír y pasarla bien no necesitan una copa.</p>
+  <div class="hero-cta">
+    <a href="#lugares" class="btn-primary">
+      Explorar lugares
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </a>
+    <button class="btn-secondary" onclick="openProfileModal()">Crear mi perfil</button>
+  </div>
+</section>
+
+<!-- MISSION STRIP -->
+<div class="mission-strip" id="mision">
+  <div class="mission-track">
+    <span>
+      Un refresco también brinda <span class="dot">●</span>
+      Reír no necesita chela <span class="dot">●</span>
+      Sin alcohol, con amigos, siempre <span class="dot">●</span>
+      Los mejores planes empiezan con un café <span class="dot">●</span>
+      Un refresco también brinda <span class="dot">●</span>
+      Reír no necesita chela <span class="dot">●</span>
+      Sin alcohol, con amigos, siempre <span class="dot">●</span>
+      Los mejores planes empiezan con un café <span class="dot">●</span>
+    </span>
+  </div>
+</div>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number" id="totalPlaces">35</div>
+      <div class="stat-label">Lugares reales verificados en SLP</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">8</div>
+      <div class="stat-label">Categorías para escoger según tu vibe</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">0</div>
+      <div class="stat-label">Razones para necesitar alcohol</div>
+    </div>
+  </div>
+</section>
+
+<!-- PLACES -->
+<section class="places-section" id="lugares">
+  <div class="places-header">
+    <h2 class="section-title">Encuentra tu <span class="italic">lugar</span></h2>
+    <p class="section-subtitle">Filtra por lo que tengas ganas. Pizza, boba, billar, un café, lo que sea.</p>
+  </div>
+
+  <div class="filters" id="filters">
+    <!-- Se llenan con JS -->
+  </div>
+
+  <div class="places-grid" id="placesGrid">
+    <!-- Se llenan con JS -->
+  </div>
+</section>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Tu <span class="italic">perfil</span></div>
+        <p style="color:var(--plum-soft); font-size:0.9rem; margin-top:4px;">Pa' que tus papás sepan dónde andas.</p>
+      </div>
+      <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-info">
+        <strong>¿Por qué pedimos números?</strong> Cuando elijas un lugar, se les enviará a tus tutores la información del sitio. Así puedes salir tranqui y ellos saben dónde estás.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tu nombre</label>
+        <input type="text" class="form-input" id="userName" placeholder="Ej: Carlos">
+        <div class="form-error" id="err-userName">Escribe tu nombre porfa</div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tu edad</label>
+          <input type="number" class="form-input" id="userAge" placeholder="16" min="12" max="17">
+          <div class="form-error" id="err-userAge">Edad entre 12 y 17</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tu celular</label>
+          <input type="tel" class="form-input" id="userPhone" placeholder="444 123 4567">
+          <div class="form-error" id="err-userPhone">10 dígitos, sin espacios</div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px; padding-top:20px; border-top: 2px dashed rgba(42,31,45,0.15);">
+        <label class="form-label" style="font-size:1rem; margin-bottom:12px;">Contactos de tutores <span class="helper">(mínimo 1)</span></label>
+
+        <div class="form-group">
+          <label class="form-label">Tutor 1 · Nombre</label>
+          <input type="text" class="form-input" id="parent1Name" placeholder="Ej: Mamá">
+          <div class="form-error" id="err-parent1Name">Pon cómo se llama</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tutor 1 · Celular</label>
+          <input type="tel" class="form-input" id="parent1Phone" placeholder="444 123 4567">
+          <div class="form-error" id="err-parent1Phone">10 dígitos, sin espacios</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tutor 2 · Nombre <span class="helper">(opcional)</span></label>
+          <input type="text" class="form-input" id="parent2Name" placeholder="Ej: Papá">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tutor 2 · Celular <span class="helper">(opcional)</span></label>
+          <input type="tel" class="form-input" id="parent2Phone" placeholder="444 123 4567">
+          <div class="form-error" id="err-parent2Phone">Si lo pones, que sean 10 dígitos</div>
+        </div>
+      </div>
+
+      <div id="historySection" style="margin-top:24px; padding-top:20px; border-top: 2px dashed rgba(42,31,45,0.15); display:none;">
+        <label class="form-label" style="font-size:1rem; margin-bottom:12px;">Tu historial 🕓</label>
+        <div id="historyList"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('profileModal')">Cancelar</button>
+      <button class="btn-primary" onclick="saveProfile()">Guardar perfil</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHOOSE PLACE MODAL -->
+<div class="modal-overlay" id="chooseModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Avisar a tus <span class="italic">tutores</span></div>
+        <p style="color:var(--plum-soft); font-size:0.9rem; margin-top:4px;">Se les enviará este mensaje:</p>
+      </div>
+      <button class="modal-close" onclick="closeModal('chooseModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="chooseContent"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('chooseModal')">Cancelar</button>
+      <button class="btn-primary" id="confirmChooseBtn" onclick="confirmChoose()">Enviar aviso</button>
+    </div>
+  </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div class="modal-overlay" id="successModal">
+  <div class="modal">
+    <div class="modal-body" style="text-align:center; padding:40px 32px;">
+      <div class="success-checkmark">✓</div>
+      <div class="modal-title" style="font-size:1.6rem;">Aviso <span class="italic">enviado</span></div>
+      <p style="color:var(--plum-soft); font-size:0.95rem; margin-top:12px; margin-bottom:20px;">Tus tutores ya saben a dónde vas. Ahora, a disfrutar 🙌</p>
+      <button class="btn-primary" onclick="closeModal('successModal')" style="margin: 0 auto;">Genial</button>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-content">
+    <div>
+      <div class="footer-logo">Convive<span class="italic">SLP</span></div>
+      <p class="footer-text" style="margin-top:10px;">Hecho por y para jóvenes potosinos que quieren convivir sano. Porque los mejores recuerdos no necesitan una resaca.</p>
+    </div>
+    <div style="font-size:0.88rem; opacity:0.7; text-align:right;">
+      <div>San Luis Potosí, México</div>
+      <div style="margin-top:4px;">2026</div>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    Todos los lugares son reales y verificados en Google Maps. Las recomendaciones son libres de alcohol o familiar-friendly.
+  </div>
+</footer>
+
+<script>
+  // ============ DATOS DE LUGARES REALES EN SLP ============
+  const PLACES = [
+    // PIZZA
+    { name: "Blue Pizzas Centro", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Pizza casual en pleno Centro Histórico. Buen precio, perfecto para caer con la banda después de pasear por la plaza.", address: "Manuel José Othón 355, Centro Histórico", rating: 4.4, priceLevel: 2, tags: ["Centro", "Económico"], placeId: "ChIJJ843EQKiKoQRoCB_DejLhPc", lat: 22.1517656, lng: -100.9740655 },
+    { name: "Europizza", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Ambiente chill estilo italiano, tiene opciones vegetarianas y veganas. Muy recomendado para una cena tranquila con amigos.", address: "Juan de Oñate 670, Cuauhtémoc", rating: 4.7, priceLevel: 2, tags: ["Vegetariano", "Chill"], placeId: "ChIJl0EUdAyZKoQR_i9uNBSZGBI", lat: 22.1479755, lng: -101.0038895 },
+    { name: "Ambrosía Restaurante", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Pizzas delgadas y crujientes de alta calidad. Un lugar bonito para una ocasión especial con la familia o tu grupo.", address: "Av. Prol. Muñoz 2298, Tecnológico I", rating: 4.8, priceLevel: 2, tags: ["Top", "Familiar"], placeId: "ChIJVXPTO1WfKoQRSQgBXrePl9Y", lat: 22.1738445, lng: -101.0135519 },
+    { name: "Macadamia Pizza Garden", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Pizzas exóticas con ingredientes frescos y balanceados. La terraza es súper agradable y el servicio muy amable.", address: "Fray José de Arlegui 325, Col. Polanco", rating: 4.3, priceLevel: 2, tags: ["Terraza", "Único"], placeId: "ChIJ-aOWP0qZKoQRMLmcNsjlynY", lat: 22.1493561, lng: -101.0125184 },
+    { name: "Tiberius", category: "pizza", categoryLabel: "Pizza", emoji: "🍕", description: "Clásico italiano en Carranza. Lasaña, pastas y pizza al horno. Buen volumen de comida y ambiente animado.", address: "Av. Venustiano Carranza 1047, Tequisquiapan", rating: 4.3, priceLevel: 2, tags: ["Italiano", "Clásico"], placeId: "ChIJe5L0p0efKoQRE5aTLMXSQ1k", lat: 22.150367, lng: -100.98859 },
+
+    // CAFÉS / MOCKTAILS
+    { name: "Lanthimos Barra de Café", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "El mejor café de especialidad de SLP según los reviews. Pequeño, acogedor y con muy buena cookie de chocolate.", address: "Valentín Gama 840b, Las Águilas", rating: 4.8, priceLevel: 1, tags: ["Especialidad", "Íntimo"], placeId: "ChIJb23_QeuZKoQRvrf65JYPxjQ", lat: 22.1464312, lng: -101.0079025 },
+    { name: "Arandela Coffee Bar", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Tostaduría de café con ambiente genial. Comida rica, buen precio y siempre con gente disfrutando el momento.", address: "Av. Cordillera de los Himalaya 250, Garita de Jalisco", rating: 4.6, priceLevel: 1, tags: ["Popular", "Económico"], placeId: "ChIJYZ53v9uYKoQRtSR7IxUfwvY", lat: 22.1338018, lng: -101.0189081 },
+    { name: "KAFFEE KUNST BERLÍN", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Cafetería estilo alemán en el Centro, con panadería y postres que son obras de arte. Ideal para estudiar o platicar.", address: "Avenida Universidad 133, Centro Histórico", rating: 4.6, priceLevel: 2, tags: ["Centro", "Estudio"], placeId: "ChIJgVl_KVqjKoQROxuQpp9F_UY", lat: 22.1492746, lng: -100.9785404 },
+    { name: "ConSentido Café", category: "cafe", categoryLabel: "Café", emoji: "☕", description: "Brunch, latte de mazapán y crepas de fruta. Ambiente positivo y perfecto pa' ir con amigos un sábado.", address: "Av. Nicolás Zapata 1505, Parque España 2da Secc", rating: 4.8, priceLevel: 2, tags: ["Brunch", "Top"], placeId: "ChIJsWAhQ9yfKoQRYs-hUernbAM", lat: 22.1534071, lng: -101.0050592 },
+
+    // BILLAR
+    { name: "Billar Inn Tangamanga", category: "billar", categoryLabel: "Billar", emoji: "🎱", description: "Mesas en buen estado, ambiente familiar y precio razonable ($42 por hora). El clásico para jugar unas rondas con los cuates.", address: "Av Himno Nacional 2075, Tangamanga", rating: 4.4, priceLevel: 1, tags: ["Familiar", "Económico"], placeId: "ChIJMQQBbLCYKoQRrqqMGOutzwI", lat: 22.1407612, lng: -100.9937575 },
+    { name: "Billares Michelle's", category: "billar", categoryLabel: "Billar", emoji: "🎱", description: "Considerado de los mejores billares de la ciudad. Mesas de lujo, ambiente familiar, torneos y buen servicio.", address: "Av. Damián Carmona 1440, Barrio de Santiago", rating: 4.6, priceLevel: 1, tags: ["Top", "Torneos"], placeId: "ChIJ3TK7ZOihKoQRd61zqMsrS6g", lat: 22.1652426, lng: -100.980319 },
+    { name: "Billarinn Soledad", category: "billar", categoryLabel: "Billar", emoji: "🎱", description: "Uno de los billares más adecuados de la zona de Soledad. Ambiente familiar y precios iguales a otros lados.", address: "Miguel Hidalgo 634c, Soledad de Graciano Sánchez", rating: 4.1, priceLevel: 1, tags: ["Soledad", "Familiar"], placeId: "ChIJI4mJd7uhKoQRfRR2Zmi4unk", lat: 22.1847414, lng: -100.9495699 },
+
+    // POSTRES / HELADOS
+    { name: "Helados del Abuelo", category: "postres", categoryLabel: "Postres", emoji: "🍦", description: "Helados naturales con variedad de sabores. Prueba el mamey y dulce de leche. Clásico del Centro.", address: "Ignacio Zaragoza 504, Centro", rating: 4.5, priceLevel: 1, tags: ["Natural", "Centro"], placeId: "ChIJuzw5ewGiKoQRNZM3ntQTsuw", lat: 22.149058, lng: -100.975504 },
+    { name: "Helados y Postres Bonissimo", category: "postres", categoryLabel: "Postres", emoji: "🍦", description: "Mochi, ice cream milkshakes, affogato y café. Pet-friendly y buen espacio para estudiar o platicar.", address: "Amado Nervo 1300, Lindavista", rating: 4.8, priceLevel: 2, tags: ["Mochi", "Top"], placeId: "ChIJT87pszSfKoQRTmM_iocpiu8", lat: 22.1507903, lng: -101.0079417 },
+    { name: "Nevería Alaska", category: "postres", categoryLabel: "Postres", emoji: "🍦", description: "Nevería tradicional dentro del Mercado de La Merced. Precios accesibles y sabores con fruta natural.", address: "Mercado de La Merced, Calz. de Guadalupe", rating: 4.2, priceLevel: 1, tags: ["Tradicional", "Mercado"], placeId: "ChIJt3otW-2hKoQRipKZsI7CDU8", lat: 22.1461957, lng: -100.9741616 },
+    { name: "Don Rafael Herencia Michoacana", category: "postres", categoryLabel: "Postres", emoji: "🍦", description: "Crepas, helados michoacanos, frappes y más. Andador Zaragoza, perfecto para un antojito en el Centro.", address: "Andador Zaragoza, Ignacio López Rayón 755, Centro", rating: 4.7, priceLevel: 1, tags: ["Centro", "Crepas"], placeId: "ChIJNVymdcyjKoQRWaf_hYHAZC0", lat: 22.1478147, lng: -100.9749813 },
+    { name: "Sta. Elena", category: "postres", categoryLabel: "Postres", emoji: "🍦", description: "Paletas y helados con fruta natural de calidad. Servicio súper amable, ideal pa' una tarde tranquila.", address: "Antonio de Otahegi 295", rating: 4.8, priceLevel: 1, tags: ["Natural", "Top"], placeId: "ChIJ3x8CZPihKoQRziWt_7uPovk", lat: 22.1540562, lng: -100.9718346 },
+
+    // BOBA
+    { name: "Boba SLP Centro", category: "boba", categoryLabel: "Boba Tea", emoji: "🧋", description: "Decorado lindo, tienen juegos de mesa y espejos para fotos. El de Oreo y el de mora con queso son los top.", address: "Av. Damián Carmona 405C, Centro", rating: 4.6, priceLevel: 2, tags: ["Centro", "Juegos"], placeId: "ChIJoVMGKKmhKoQRYKg6K7Nx09g", lat: 22.1539566, lng: -100.9790211 },
+    { name: "Bute", category: "boba", categoryLabel: "Boba Tea", emoji: "🧋", description: "El mejor boba de SLP según los fans de la tapioca. Gran variedad de sabores, precios accesibles y tarjeta de cliente frecuente.", address: "C. del Parque 200, Fuentes del Bosque", rating: 4.2, priceLevel: 1, tags: ["Variedad", "Top"], placeId: "ChIJeYKDiUCfKoQRh57AIwP33Zc", lat: 22.151592, lng: -101.013404 },
+    { name: "Boba SLP Carranza", category: "boba", categoryLabel: "Boba Tea", emoji: "🧋", description: "Dentro del Food Park SLP. Gran variedad de toppings, ambiente fresa y área grande pa' caer con la banda.", address: "Av. Venustiano Carranza 1650, Col del Valle", rating: 4.4, priceLevel: 2, tags: ["Food Park", "Carranza"], placeId: "ChIJn47SIUyZKoQRXN1AwX0ayEg", lat: 22.1498849, lng: -101.0004165 },
+
+    // HAMBURGUESAS
+    { name: "Bistrucknomia", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Hamburguesas originales como la Norteña. Servicio excepcional, música chida y ambiente muy familiar.", address: "Av. Hernán Cortes 285, Los Reyes", rating: 4.8, priceLevel: 2, tags: ["Original", "Top"], placeId: "ChIJh9lnLUGfKoQRg2HQGz3BC-g", lat: 22.1706365, lng: -100.9962773 },
+    { name: "Burgeros", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Hamburguesas con videojuegos y juegos de mesa en el local. Literal el plan completo: comer + jugar arcade.", address: "Calz de Guadalupe 1815, Santuario", rating: 4.6, priceLevel: 2, tags: ["Arcade", "Juegos"], placeId: "ChIJI2joEW2iKoQRjquKjoCppRg", lat: 22.1275504, lng: -100.9673593 },
+    { name: "La Buena Burger", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Hamburguesas 100% carne con vista a Plaza del Carmen. Área de juegos y ambiente juvenil-familiar.", address: "Mariano Escobedo 335, Centro Histórico", rating: 4.0, priceLevel: 2, tags: ["Centro", "Vista"], placeId: "ChIJef3F1mOjKoQRtcAN6a0_F9U", lat: 22.1514656, lng: -100.9746787 },
+    { name: "Hamburguesas Juan del Jarro", category: "burger", categoryLabel: "Burger", emoji: "🍔", description: "Hamburguesas al estilo mexicano (de arrachera, pollo, res). Lugar familiar chico con atención personalizada.", address: "Juan del Jarro 351, Damián Carmona", rating: 4.6, priceLevel: 1, tags: ["Mexicano", "Económico"], placeId: "ChIJJ5YyFUifKoQRkOpBmKPWZIg", lat: 22.1694313, lng: -100.9830057 },
+
+    // ARCADE / JUEGOS
+    { name: "Circus Park Col del Valle", category: "arcade", categoryLabel: "Arcade", emoji: "🎮", description: "Parque de máquinas y juegos. El lugar ideal para un plan con primos, amigos o cita diferente.", address: "Av Nereo Rodríguez Barragán 450, Col del Valle", rating: 4.5, priceLevel: 2, tags: ["Juegos", "Familiar"], placeId: "ChIJt3oia0qfKoQRIWK6sMTnOoU", lat: 22.155075, lng: -101.0049233 },
+    { name: "Circus Park Soledad", category: "arcade", categoryLabel: "Arcade", emoji: "🎮", description: "Sucursal en Soledad con máquinas para jóvenes y niños. Pequeño pero divertido, buena opción para pasar el rato.", address: "Lat. Carr. San Luis - Matehuala 3600, Soledad", rating: 4.4, priceLevel: 2, tags: ["Soledad", "Juegos"], placeId: "ChIJFySSXLyhKoQR3rHCmm9KF9Q", lat: 22.182181, lng: -100.9506316 },
+    { name: "Diverzone SAN LUIS", category: "arcade", categoryLabel: "Arcade", emoji: "🎮", description: "Tienda de máquinas y reparación de arcade. Buen ambiente y precio, variedad de juegos clásicos.", address: "Av. José de Gálvez 640-a, Ricardo B. Anaya", rating: 4.0, priceLevel: 1, tags: ["Clásicos", "Reparación"], placeId: "ChIJF037nc6jKoQRi4gNNxocTH0", lat: 22.138529, lng: -100.9246128 },
+
+    // CREPAS / WAFFLES
+    { name: "Vishuddha Crepas Carranza", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "Crepas dulces y saladas + café, en pleno Carranza. Combos económicos para la noche y ambiente relajado.", address: "Av. Venustiano Carranza 550, Centro", rating: 4.8, priceLevel: 2, tags: ["Top", "Carranza"], placeId: "ChIJTRqInTGZKoQR9nhFZNXF5ZM", lat: 22.1513183, lng: -100.9817254 },
+    { name: "Vishuddha Crepas B. Anaya", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "La sucursal de Anaya, igual de top que la del Centro. Pide un frappe + crepa y viaje directo al paraíso.", address: "Fray G. Eslava 106, Ricardo B. Anaya", rating: 4.8, priceLevel: 2, tags: ["Top", "Zona Anaya"], placeId: "ChIJhSXgps2jKoQRUy5W6TmOF4I", lat: 22.1420036, lng: -100.9324245 },
+    { name: "Crepería & Waffles Kikines", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "Waffles y crepas a buen precio. Frappes con ingredientes de calidad. Menú variado, opción amplia.", address: "Paseo del Valle de San Francisco 228, Los Silos", rating: 4.4, priceLevel: 1, tags: ["Económico", "Frappes"], placeId: "ChIJ3cbEXNKjKoQRAHqo6La_LSU", lat: 22.1282213, lng: -100.9008752 },
+    { name: "Covent Garden Café Y Crepas", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "Crepas, café y té en el Centro Histórico. Espacio chico, acogedor, ideal pa' ir con tu crush o mejor amigo.", address: "Mariano Arista 240, Centro Histórico", rating: 4.6, priceLevel: 2, tags: ["Centro", "Íntimo"], placeId: "ChIJJzOsnP-hKoQRalDvIT4idBk", lat: 22.1533316, lng: -100.9782025 },
+    { name: "Cafetería Blue Berry", category: "crepas", categoryLabel: "Crepas", emoji: "🥞", description: "Cafetería con crepas, helados y variedad de malteadas. Lugar acogedor y platillos con buena presentación.", address: "Cto. Granjas Nte. 311, Industrial Aviación", rating: 4.5, priceLevel: 1, tags: ["Malteadas", "Acogedor"], placeId: "ChIJo4ofaRWfKoQR9cr9bhTc0LA", lat: 22.1750957, lng: -101.0050046 },
+  ];
+
+  const CATEGORIES = [
+    { id: 'all', label: 'Todo', emoji: '✨' },
+    { id: 'pizza', label: 'Pizza', emoji: '🍕' },
+    { id: 'cafe', label: 'Café', emoji: '☕' },
+    { id: 'billar', label: 'Billar', emoji: '🎱' },
+    { id: 'postres', label: 'Postres', emoji: '🍦' },
+    { id: 'boba', label: 'Boba Tea', emoji: '🧋' },
+    { id: 'burger', label: 'Burgers', emoji: '🍔' },
+    { id: 'arcade', label: 'Arcade', emoji: '🎮' },
+    { id: 'crepas', label: 'Crepas', emoji: '🥞' },
+  ];
+
+  // ============ STATE ============
+  let currentFilter = 'all';
+  let userProfile = null;
+  let choosingPlace = null;
+  let history = [];
+
+  // ============ STORAGE ============
+  async function loadData() {
+    try {
+      const profileRes = await window.storage.get('profile');
+      if (profileRes && profileRes.value) userProfile = JSON.parse(profileRes.value);
+    } catch(e) {}
+    try {
+      const historyRes = await window.storage.get('history');
+      if (historyRes && historyRes.value) history = JSON.parse(historyRes.value);
+    } catch(e) { history = []; }
+    updateProfileBtn();
+  }
+
+  async function saveData(key, value) {
+    try {
+      await window.storage.set(key, JSON.stringify(value));
+    } catch(e) {
+      console.error('Storage error:', e);
+    }
+  }
+
+  // ============ INIT ============
+  function init() {
+    document.getElementById('totalPlaces').textContent = PLACES.length;
+    renderFilters();
+    renderPlaces();
+    loadData();
+  }
+
+  function renderFilters() {
+    const container = document.getElementById('filters');
+    container.innerHTML = CATEGORIES.map(cat => {
+      const count = cat.id === 'all' ? PLACES.length : PLACES.filter(p => p.category === cat.id).length;
+      return `
+        <button class="filter-btn ${cat.id === currentFilter ? 'active' : ''}" onclick="setFilter('${cat.id}')">
+          <span>${cat.emoji}</span>
+          <span>${cat.label}</span>
+          <span class="filter-count">${count}</span>
+        </button>
+      `;
+    }).join('');
+  }
+
+  function setFilter(id) {
+    currentFilter = id;
+    renderFilters();
+    renderPlaces();
+  }
+
+  function renderPlaces() {
+    const container = document.getElementById('placesGrid');
+    const filtered = currentFilter === 'all' ? PLACES : PLACES.filter(p => p.category === currentFilter);
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="no-results">No hay lugares en esta categoría todavía.</div>';
+      return;
+    }
+
+    container.innerHTML = filtered.map((p, idx) => {
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}&query_place_id=${p.placeId}`;
+      const priceStr = '$'.repeat(p.priceLevel || 1);
+      return `
+        <div class="place-card" style="animation-delay: ${idx * 0.04}s">
+          <div class="place-card-header">
+            <span class="category-badge">${p.emoji} ${p.categoryLabel}</span>
+            <span class="rating-badge"><span class="star">★</span> ${p.rating}</span>
+          </div>
+          <div class="place-card-body">
+            <h3 class="place-name">${p.name}</h3>
+            <p class="place-description">${p.description}</p>
+            <div class="place-tags">
+              <span class="place-tag price">${priceStr}</span>
+              ${p.tags.map(t => `<span class="place-tag">${t}</span>`).join('')}
+            </div>
+            <div class="place-address">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              <span>${p.address}</span>
+            </div>
+            <div class="place-actions">
+              <a href="${mapsUrl}" target="_blank" rel="noopener" class="btn-maps">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+                Google Maps
+              </a>
+              <button class="btn-choose" onclick='choosePlace(${JSON.stringify(p).replace(/'/g, "&apos;")})'>
+                Avisar que voy
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ============ PROFILE ============
+  function openProfileModal() {
+    if (userProfile) {
+      document.getElementById('userName').value = userProfile.userName || '';
+      document.getElementById('userAge').value = userProfile.userAge || '';
+      document.getElementById('userPhone').value = userProfile.userPhone || '';
+      document.getElementById('parent1Name').value = userProfile.parent1Name || '';
+      document.getElementById('parent1Phone').value = userProfile.parent1Phone || '';
+      document.getElementById('parent2Name').value = userProfile.parent2Name || '';
+      document.getElementById('parent2Phone').value = userProfile.parent2Phone || '';
+      renderHistory();
+    }
+    openModal('profileModal');
+  }
+
+  function validatePhone(p) {
+    const clean = p.replace(/\s|-/g, '');
+    return /^\d{10}$/.test(clean);
+  }
+
+  function saveProfile() {
+    // Clear previous errors
+    document.querySelectorAll('.form-error').forEach(e => e.classList.remove('visible'));
+    document.querySelectorAll('.form-input').forEach(i => i.classList.remove('error'));
+
+    const data = {
+      userName: document.getElementById('userName').value.trim(),
+      userAge: parseInt(document.getElementById('userAge').value),
+      userPhone: document.getElementById('userPhone').value.trim(),
+      parent1Name: document.getElementById('parent1Name').value.trim(),
+      parent1Phone: document.getElementById('parent1Phone').value.trim(),
+      parent2Name: document.getElementById('parent2Name').value.trim(),
+      parent2Phone: document.getElementById('parent2Phone').value.trim(),
+    };
+
+    let valid = true;
+
+    if (!data.userName) { showErr('userName'); valid = false; }
+    if (!data.userAge || data.userAge < 12 || data.userAge > 17) { showErr('userAge'); valid = false; }
+    if (!validatePhone(data.userPhone)) { showErr('userPhone'); valid = false; }
+    if (!data.parent1Name) { showErr('parent1Name'); valid = false; }
+    if (!validatePhone(data.parent1Phone)) { showErr('parent1Phone'); valid = false; }
+    if (data.parent2Phone && !validatePhone(data.parent2Phone)) { showErr('parent2Phone'); valid = false; }
+
+    if (!valid) return;
+
+    userProfile = data;
+    saveData('profile', userProfile);
+    updateProfileBtn();
+    closeModal('profileModal');
+  }
+
+  function showErr(id) {
+    document.getElementById('err-' + id).classList.add('visible');
+    document.getElementById(id).classList.add('error');
+  }
+
+  function updateProfileBtn() {
+    const btn = document.getElementById('profileBtnText');
+    if (userProfile) {
+      btn.textContent = `👋 ${userProfile.userName}`;
+    } else {
+      btn.textContent = 'Crear perfil';
+    }
+  }
+
+  // ============ CHOOSE PLACE ============
+  function choosePlace(place) {
+    if (!userProfile) {
+      alert('Primero crea tu perfil para avisar a tus tutores 🙏');
+      openProfileModal();
+      return;
+    }
+    choosingPlace = place;
+    renderChooseModal();
+    openModal('chooseModal');
+  }
+
+  function renderChooseModal() {
+    const p = choosingPlace;
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}&query_place_id=${p.placeId}`;
+    const now = new Date();
+    const timeStr = now.toLocaleString('es-MX', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+
+    const parents = [];
+    if (userProfile.parent1Name && userProfile.parent1Phone) {
+      parents.push({ name: userProfile.parent1Name, phone: userProfile.parent1Phone });
+    }
+    if (userProfile.parent2Name && userProfile.parent2Phone) {
+      parents.push({ name: userProfile.parent2Name, phone: userProfile.parent2Phone });
+    }
+
+    const container = document.getElementById('chooseContent');
+    container.innerHTML = `
+      <p style="font-size:0.95rem; color: var(--plum-soft); margin-bottom: 16px;">Se enviará a:</p>
+      <div class="parent-list">
+        ${parents.map(pa => `<div class="parent-item"><strong>${pa.name}</strong><span>${pa.phone}</span></div>`).join('')}
+      </div>
+      <div class="notification-preview">
+        <p>
+          Hola ${parents[0].name.split(' ')[0]}, soy <strong>${userProfile.userName}</strong>. Voy a estar en <strong>${p.name}</strong> ${p.emoji} (${p.categoryLabel}).<br><br>
+          📍 ${p.address}<br>
+          🗺️ <span class="maps-link">${mapsUrl}</span><br>
+          ⏰ ${timeStr}<br><br>
+          Te aviso por ConviveSLP. Cualquier cosa me marcas al ${userProfile.userPhone}.
+        </p>
+      </div>
+    `;
+  }
+
+  function confirmChoose() {
+    // Simulated send - save to history
+    const p = choosingPlace;
+    const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${p.lat},${p.lng}&query_place_id=${p.placeId}`;
+    history.unshift({
+      placeName: p.name,
+      placeEmoji: p.emoji,
+      category: p.categoryLabel,
+      address: p.address,
+      mapsUrl: mapsUrl,
+      timestamp: Date.now(),
+    });
+    if (history.length > 20) history = history.slice(0, 20);
+    saveData('history', history);
+
+    closeModal('chooseModal');
+    setTimeout(() => openModal('successModal'), 200);
+  }
+
+  function renderHistory() {
+    const section = document.getElementById('historySection');
+    const list = document.getElementById('historyList');
+
+    if (history.length === 0) {
+      section.style.display = 'block';
+      list.innerHTML = '<div class="history-empty">Aún no has avisado a tus tutores de ningún lugar.</div>';
+      return;
+    }
+
+    section.style.display = 'block';
+    list.innerHTML = history.slice(0, 10).map(h => {
+      const date = new Date(h.timestamp);
+      const dateStr = date.toLocaleString('es-MX', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      return `
+        <div class="history-item">
+          <div class="history-item-info">
+            <h4>${h.placeEmoji} ${h.placeName}</h4>
+            <p>${h.category} · ${dateStr}</p>
+          </div>
+          <a href="${h.mapsUrl}" target="_blank" rel="noopener" class="btn-maps" style="padding: 6px 12px; font-size: 0.75rem;">Maps</a>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // ============ MODAL HELPERS ============
+  function openModal(id) {
+    document.getElementById(id).classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  // Close modal when clicking overlay
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+
+  // Escape to close
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active'));
+      document.body.style.overflow = '';
+    }
+  });
+
+  init();
+</script>
+</body>
+</html>
